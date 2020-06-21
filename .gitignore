@@ -72,3 +72,4 @@
 .ccls-cache/
 tags
 .tup/
+bin/List
