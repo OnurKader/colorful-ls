@@ -4,7 +4,6 @@
 
 #include <filesystem>
 #include <fmt/core.h>
-#include <string>
 #include <string_view>
 
 // TODO: Check if the terminal supports TrueColor, if not check for 8-bit then use them
@@ -28,6 +27,7 @@ private:
 	const fs::path m_file_path;
 	const std::string_view m_file_name;
 	const bool m_is_directory;
+	const bool m_is_symlink;
 	const std::size_t m_file_size;
 };
 
