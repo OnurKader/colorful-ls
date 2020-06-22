@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <fmt/core.h>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -15,10 +16,13 @@ int main(int argc, char** argv)
 	if(!results)
 		return 1;
 
-	const std::string_view queried_path {argc == 1 ? "." : argv[1]};
-	OK::File queried_file(queried_path);
+	std::vector<OK::File> files(&argv[1], &argv[argc]);
 
-	fmt::print("File stuff: {}-{}B\n", queried_file.filename(), queried_file.size());
+	for(auto&& file: files)
+		fmt::print("Ext. {}\nFile stuff: {}-{}B\n",
+				   get_ext_from_filename(file.name()),
+				   file.name(),
+				   file.size());
 
 	return 0;
 }
