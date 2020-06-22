@@ -13,31 +13,31 @@ namespace fs = std::filesystem;
 
 namespace OK
 {
-// MAYBE: Have a Type enum with like REG, DIR, SOCK, PIPE, LINK stuff like that and return that upon
-// request?
-
 class File final
 {
 public:
-	File(const std::string_view file_name);
+	explicit File(const fs::path file_path);
 
-	[[nodiscard]] std::string_view filename() const noexcept { return m_file_name; }
-	[[nodiscard]] std::string_view name() const noexcept { return m_file_name; }
-	[[nodiscard]] fs::path filepath() const noexcept { return m_file_path; }
+	[[nodiscard]] std::u8string_view name() const noexcept { return m_file_name; }
 	[[nodiscard]] fs::path path() const noexcept { return m_file_path; }
 	[[nodiscard]] std::size_t size() const noexcept { return m_file_size; }
-	// Instead of this have a type one?
-	[[nodiscard]] bool is_directory() const noexcept { return m_is_directory; }
+	[[nodiscard]] fs::file_type type() const noexcept { return m_file_type; }
+
+	[[nodiscard]] std::u8string to_string(const bool long_listing) const noexcept;
+	[[nodiscard]] std::size_t string_length(const bool long_listing) const noexcept;
 
 private:
 	const fs::path m_file_path;
-	const std::string_view m_file_name;
-	const bool m_is_directory;
-	const std::size_t m_file_size;
+	const fs::file_type m_file_type;
 
-	std::string_view m_icon;
-	std::string_view m_color;
-	std::string_view m_extension;
+	std::u8string m_file_name;
+	std::size_t m_file_size;
+	std::u8string_view m_extension;
+	std::u8string_view m_icon;
+	std::u8string_view m_color;
+	std::u8string_view m_indicator;
+
+	void handle_icon_and_color() noexcept;
 };
 
 }	 // namespace OK
