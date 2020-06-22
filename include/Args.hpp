@@ -2,7 +2,7 @@
 
 #include "cxxopts.hpp"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <optional>
 
 namespace OK
