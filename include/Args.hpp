@@ -12,6 +12,7 @@ struct ParsedOptions
 {
 	const bool all : 1;
 	const bool human : 1;
+	const bool kibi : 1;
 	const bool long_listing : 1;
 	const bool color : 1;
 	const bool no_color : 1;
@@ -27,10 +28,11 @@ public:
 	{
 		m_options.add_options()("H,help",
 								"Print this screen")("a,all", "Show hidden files, except . and ..")(
-			"h,human", "Human readable sizes, SI units (1KB=1000B)")(
-			"l,long", "Long listing with size, ownership, permissions and time info")(
+			"h,human", "Human readable sizes SI Units by default (1K = 1000)")(
+			"k,kibi", "Use KibiByte system (1Ki = 1024)")(
+			"l,long", "Long listing with size, ownership, perms and time")(
 			"c,color", "Enable colorful printing (default)")(
-			"C,no-color", "Disable colorful printing, will disable if STDOUT is not a tty")(
+			"C,no-color", "Disable colorful printing, disable if STDOUT is not a tty")(
 			"r,reverse", "Reverse the printing order")(
 			"1,one-line", "Print a single file on each row, not --long")(
 			"d,dir", "Don't go into a directory, just print it");
@@ -49,6 +51,7 @@ public:
 
 			return ParsedOptions {0UL != result.count("all"),
 								  0UL != result.count("human"),
+								  0UL != result.count("kibi"),
 								  0UL != result.count("long"),
 								  0UL != result.count("color"),
 								  0UL != result.count("no-color"),
@@ -58,7 +61,7 @@ public:
 		}
 		catch(const cxxopts::OptionParseException& e)
 		{
-			fmt::print(stderr, "{}\n", e.what());
+			fmt::print(stderr, "{}\n{}", e.what(), m_options.help());
 			return std::nullopt;
 		}
 	}

@@ -16,20 +16,35 @@ int main(int argc, char** argv)
 	OK::Args args;
 	const auto results_opt = args.parse(argc, argv);
 	if(!results_opt)
-		return 1;
+		return 69;
 	const auto results = results_opt.value();
 
 	OK::File file {argc == 1 ? "." : argv[1]};
-	if(fs::is_directory(file.path()))
+	if(!fs::exists(file.path()))
 	{
+		fmt::print(
+			stderr, "    {}File or directory not found{}\n", OK::Color::RED, OK::Color::RESET);
+		return 1;
+	}
+	else if(fs::is_directory(file.path()))
+	{
+		const auto num_of_files_in_directory =
+			std::distance(std::filesystem::directory_iterator {file.path()},
+						  std::filesystem::directory_iterator {});
+		if(num_of_files_in_directory == 0U)
+		{
+			fmt::print(stderr, "    {}Nothing to show here...\n", OK::Color::rgb(229, 195, 38));
+			return 0;
+		}
+
+		// The actual printing
+
 		for(auto&& path: fs::directory_iterator(file.path()))
-			fmt::print("\t{:<45} - {}\n",
-					   OK::File {path}.to_string(results.long_listing),
-					   OK::File {path}.string_length(results.long_listing));
+			fmt::print("{}", OK::File {path}.to_string(results));
 	}
 	else
 	{
-		fmt::print("\t{}\n", file.to_string(results.long_listing));
+		fmt::print("{}", file.to_string(results));
 	}
 
 	return 0;
