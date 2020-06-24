@@ -100,6 +100,7 @@ static constexpr std::array icons {// Peki <3
 								   std::pair {"jpeg", "\uf1c5 "},
 								   std::pair {"png", "\uf1c5 "},
 								   std::pair {"Pictures", "\uf1c5 "},
+								   std::pair {"Photos", "\uf1c5 "},
 								   std::pair {"ps", "\uf7ea "},
 								   std::pair {"psd", "\ue7b8 "},
 								   std::pair {"svg", "\ufc1f "},

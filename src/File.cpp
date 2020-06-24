@@ -13,19 +13,20 @@ using namespace fmt::literals;
 namespace OK
 {
 File::File(const fs::path file_path) :
-	m_file_path {file_path}, m_file_type {fs::symlink_status(m_file_path).type()}
+	m_file_path {file_path},
+	m_file_type {fs::symlink_status(m_file_path).type()},
+	m_file_name {file_path.string()}
 {
 	if(fs::is_directory(m_file_path))
 	{
 		m_file_size = 4096ULL;
 	}
-	else
+	else if(fs::exists(m_file_path))
 	{
-		if(fs::exists(m_file_path))
-			m_file_size = fs::file_size(m_file_path);
+		// We're making File's, how can the path not exist
+		m_file_size = fs::file_size(m_file_path);
 	}
 
-	m_file_name = file_path.string();
 	m_file_name.erase(0ULL, m_file_name.find_last_of('/') + 1ULL);
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
@@ -33,12 +34,13 @@ File::File(const fs::path file_path) :
 
 File::File(File&& other) :
 	m_file_path {std::move(other.m_file_path)},
-	m_file_type {other.m_file_type},
+	m_file_type {std::move(other.m_file_type)},
 	m_file_name {std::move(other.m_file_name)},
 	m_file_size {std::move(other.m_file_size)},
 	m_extension {std::move(other.m_extension)},
 	m_icon {std::move(other.m_icon)},
-	m_color {std::move(other.m_color)}
+	m_color {std::move(other.m_color)},
+	m_indicator {std::move(other.m_indicator)}
 {
 	// MAYBE: Default this constructor?
 }
@@ -46,13 +48,13 @@ File::File(File&& other) :
 File& File::operator=(File&& other)
 {
 	m_file_path = std::move(other.m_file_path);
-	// Unnecessary!
 	m_file_type = std::move(other.m_file_type);
 	m_file_size = std::move(other.m_file_size);
 	m_file_name = std::move(other.m_file_name);
 	m_extension = std::move(other.m_extension);
 	m_color = std::move(other.m_color);
 	m_icon = std::move(other.m_icon);
+	m_indicator = std::move(other.m_indicator);
 
 	return *this;
 }
@@ -91,15 +93,19 @@ bool File::operator<(const File& other) const
 {
 	// Do checks for symlinks
 	using ft = fs::file_type;
-	// Dir to Dir
-	if(m_file_type == ft::directory && other.m_file_type == ft::directory)
-		return mb_lower(m_file_name) < mb_lower(other.m_file_name);
-	else if(m_file_type == ft::directory && other.m_file_type != ft::directory)
+	ft this_type = m_file_type;
+	if(fs::is_symlink(m_file_path))
+	{
+		const auto followed_stat = fs::status(m_file_path);
+		if(fs::exists(followed_stat))
+			this_type = followed_stat.type();
+	}
+
+	if(this_type == ft::directory && other.m_file_type != ft::directory)
 		return true;
-	else if(m_file_type != ft::directory && other.m_file_type == ft::directory)
+	else if(this_type != ft::directory && other.m_file_type == ft::directory)
 		return false;
-	else if(m_file_type != ft::directory &&
-			other.m_file_type != ft::directory)	   // Can just be combined with the first if
+	else
 		return mb_lower(m_file_name) < mb_lower(other.m_file_name);
 }
 
@@ -115,14 +121,33 @@ std::string File::to_string(const ParsedOptions po) const noexcept
 		return icon_and_color_filename();
 	}
 
+	// Because I'm doing {:>5} for size, this can't be inside the size string calculation
+	// Extract this into a function with 2 params, size, po.kibi
+
+	// Unnecessary lambda is unnecessary
+	// MAYBE: change these to KiB if -k is provided, cause we have that here
+	const std::string size_color = [&] {
+		if(m_file_size < 1'000'000ULL)	  // 1MB
+			return Color::rgb(255, 255, 255);
+		else if(m_file_size < 128'000'000ULL)	 // 128MB
+			return Color::rgb(113, 220, 208);
+		else if(m_file_size < 512'000'000ULL)	 // 512MB
+			return Color::rgb(250, 250, 48);
+		else if(m_file_size < 1'000'000'000ULL)	   // 1GB
+			return Color::rgb(223, 134, 89);
+		return Color::rgb(0, 255, 255);
+	}();
+
 	// TODO: Add long listing format with user group info and time and perms
 	// TODO: Symlink point stuff
 	// FIXME: Change this 5 to the maximum length of the sizes
-	return fmt::format("  {}  {}  {} {:>5}  {}  {}\n",
+	return fmt::format("  {}  {}  {} {}{:>5}{}  {}  {}\n",
 					   this->get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
+					   size_color,
 					   get_size_as_string(po.human, po.kibi),
+					   Color::RESET,
 					   get_modification_time(),
 					   icon_and_color_filename());
 }
@@ -271,7 +296,7 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 
 	size_t size = m_file_size;
 	size_t power_counter = 0ULL;
-	while(size / 10ULL * 10ULL > base)
+	while(size / 10ULL * 10ULL >= base)
 	{
 		size /= base;
 		++power_counter;
@@ -352,6 +377,18 @@ void File::handle_icon_and_color() noexcept
 		{
 			m_color = Color::PIPE;
 			m_indicator = "|";
+			return;
+		}
+		case fs::file_type::block:
+		{
+			m_color = Color::WHITE;
+			m_indicator = "\u2588";
+			return;
+		}
+		case fs::file_type::character:
+		{
+			m_color = Color::WHITE;
+			m_indicator = "c";
 			return;
 		}
 	}

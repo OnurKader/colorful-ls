@@ -8,8 +8,6 @@
 
 namespace fs = std::filesystem;
 
-// sgetRGB(buff, 229, 195, 38); // Empty directory colors
-
 int main(int argc, char** argv)
 {
 	std::setlocale(LC_ALL, "");
