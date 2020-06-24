@@ -18,6 +18,9 @@ class File final
 {
 public:
 	explicit File(const fs::path file_path);
+	File(File&&);
+
+	File& operator=(File&&);
 
 	[[nodiscard]] std::string_view name() const noexcept { return m_file_name; }
 	[[nodiscard]] fs::path path() const noexcept { return m_file_path; }
@@ -29,10 +32,20 @@ public:
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
 	[[nodiscard]] std::string get_size_as_string(const bool human, const bool kibi = false) const
 		noexcept;
+	[[nodiscard]] std::string get_modification_time() const noexcept;
+
+	// The order is Directories first, then Files, and dotfiles are first in both categories,
+	// lowercase comparison, find a way to get lowercase unicode characters
+	[[nodiscard]] bool operator<(const File& other) const;
+
+	[[nodiscard]] bool operator==(const File& other) const
+	{
+		return m_file_name == other.m_file_name;
+	}
 
 private:
-	const fs::path m_file_path;
-	const fs::file_type m_file_type;
+	fs::path m_file_path;
+	fs::file_type m_file_type;
 
 	std::string m_file_name;
 	std::size_t m_file_size;

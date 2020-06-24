@@ -1,7 +1,12 @@
 #include "File.hpp"
 
+#include <algorithm>
 #include <cwchar>
+#include <fmt/chrono.h>
 #include <fmt/format.h>
+
+// Sorry for this!
+#include <sys/stat.h>
 
 using namespace fmt::literals;
 
@@ -21,9 +26,81 @@ File::File(const fs::path file_path) :
 	}
 
 	m_file_name = file_path.string();
-	m_file_name.erase(0ULL, m_file_name.find_last_of(L'/') + 1ULL);
+	m_file_name.erase(0ULL, m_file_name.find_last_of('/') + 1ULL);
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
+}
+
+File::File(File&& other) :
+	m_file_path {std::move(other.m_file_path)},
+	m_file_type {other.m_file_type},
+	m_file_name {std::move(other.m_file_name)},
+	m_file_size {std::move(other.m_file_size)},
+	m_extension {std::move(other.m_extension)},
+	m_icon {std::move(other.m_icon)},
+	m_color {std::move(other.m_color)}
+{
+	// MAYBE: Default this constructor?
+}
+
+File& File::operator=(File&& other)
+{
+	m_file_path = std::move(other.m_file_path);
+	// Unnecessary!
+	m_file_type = std::move(other.m_file_type);
+	m_file_size = std::move(other.m_file_size);
+	m_file_name = std::move(other.m_file_name);
+	m_extension = std::move(other.m_extension);
+	m_color = std::move(other.m_color);
+	m_icon = std::move(other.m_icon);
+
+	return *this;
+}
+
+inline std::wstring mb_to_wstring(const std::string& mb_str)
+{
+	std::wstring temp_wide(mb_str.size(), L'\0');
+	// mbtowcs returns length of wstring, should we erase the last parts? Nah.
+	std::mbstowcs(temp_wide.data(), mb_str.data(), mb_str.size());
+	return temp_wide;
+}
+
+inline void ws_tolower(std::wstring& wstr)
+{
+	std::transform(wstr.begin(), wstr.end(), wstr.begin(), [loc = std::locale {""}](const auto& c) {
+		return std::tolower(c, loc);
+	});
+}
+
+inline std::string w_to_mbstring(const std::wstring& wstr)
+{
+	std::string temp_mb(wstr.size(), '\0');
+	std::wcstombs(temp_mb.data(), wstr.data(), wstr.size());
+	return temp_mb;
+}
+
+inline std::string mb_lower(const std::string& mb_str)
+{
+	std::wstring temp = mb_to_wstring(mb_str);
+	ws_tolower(temp);
+	return w_to_mbstring(temp);
+}
+
+// FIXME: Change this to check properly
+bool File::operator<(const File& other) const
+{
+	// Do checks for symlinks
+	using ft = fs::file_type;
+	// Dir to Dir
+	if(m_file_type == ft::directory && other.m_file_type == ft::directory)
+		return mb_lower(m_file_name) < mb_lower(other.m_file_name);
+	else if(m_file_type == ft::directory && other.m_file_type != ft::directory)
+		return true;
+	else if(m_file_type != ft::directory && other.m_file_type == ft::directory)
+		return false;
+	else if(m_file_type != ft::directory &&
+			other.m_file_type != ft::directory)	   // Can just be combined with the first if
+		return mb_lower(m_file_name) < mb_lower(other.m_file_name);
 }
 
 std::string File::icon_and_color_filename() const noexcept
@@ -37,15 +114,16 @@ std::string File::to_string(const ParsedOptions po) const noexcept
 	{
 		return icon_and_color_filename();
 	}
+
 	// TODO: Add long listing format with user group info and time and perms
 	// TODO: Symlink point stuff
 	// FIXME: Change this 5 to the maximum length of the sizes
-	return fmt::format("  {}  {}  {} {:>5} {}  {}\n",
+	return fmt::format("  {}  {}  {} {:>5}  {}  {}\n",
 					   this->get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
 					   get_size_as_string(po.human, po.kibi),
-					   "Time is an illusion yeah",
+					   get_modification_time(),
 					   icon_and_color_filename());
 }
 
@@ -200,6 +278,27 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 	}
 
 	return fmt::format("{}{}", size, kibi ? kibi_sizes[power_counter] : si_sizes[power_counter]);
+}
+
+std::string File::get_modification_time() const noexcept
+{
+	/* Waiting until GCC gets support for chrono formatting
+	const auto modify_time = fs::last_write_time(m_file_path);
+	const auto epoch_time = std::chrono::file_clock::to_sys(modify_time).time_since_epoch().count();
+	const char* format_time = std::ctime(&epoch_time);
+	return fmt::format("{}", format_time == nullptr ? "NULL" : format_time);
+	*/
+
+	// TODO: Find the difference of modify_time and now(), get a color according to that
+
+	struct stat temp_stat;
+	// Just do stat() for now, if dead links create an issue, switch to lstat
+	// What about statx()
+	stat(m_file_name.c_str(), &temp_stat);
+	const auto modify_time = temp_stat.st_mtim.tv_sec;
+	std::string result = std::ctime(&modify_time);
+	result.erase(result.end() - 1ULL);
+	return result;
 }
 
 void File::handle_icon_and_color() noexcept
