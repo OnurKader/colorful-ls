@@ -6,6 +6,8 @@
 #include <fmt/format.h>
 #include <vector>
 
+// FIXME: Dead link size thing is broken!
+
 namespace fs = std::filesystem;
 
 int main(int argc, char** argv)
