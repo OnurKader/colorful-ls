@@ -27,6 +27,8 @@ File::File(const fs::path file_path) :
 		const auto file_size_or_error = fs::file_size(m_file_path, ec);
 		if(file_size_or_error != static_cast<std::uintmax_t>(-1LL))
 			m_file_size = file_size_or_error;
+		else
+			m_file_size = 0ULL;
 	}
 	else
 	{
@@ -300,6 +302,8 @@ std::string File::get_modification_time() const noexcept
 	*/
 
 	// TODO: Find the difference of modify_time and now(), get a color according to that
+
+	// FIXME: Only works with current directory ???
 
 	struct stat temp_stat;
 	lstat(m_file_name.c_str(), &temp_stat);
