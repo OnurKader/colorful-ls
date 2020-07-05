@@ -8,6 +8,8 @@
 #include <string_view>
 
 // TODO: Check if the terminal supports TrueColor, if not check for 8-bit then use them
+// ^ It's just $COLORTERM on modern terminals (COLORTERM == truecolor)
+
 // TODO: #include <unistd.h> isatty(STDOUT_FILENO), if so no colors
 
 namespace fs = std::filesystem;
@@ -30,15 +32,15 @@ public:
 	[[nodiscard]] std::string to_string(const ParsedOptions) const noexcept;
 	[[nodiscard]] std::size_t string_length(const bool long_listing) const noexcept;
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
-	[[nodiscard]] std::string get_size_as_string(const bool human, const bool kibi = false) const
-		noexcept;
+	[[nodiscard]] std::string get_size_as_string(const bool human,
+												 const bool kibi = false) const noexcept;
 	[[nodiscard]] std::string get_modification_time() const noexcept;
 
 	// The order is Directories first, then Files, and dotfiles are first in both categories,
 	// lowercase comparison, find a way to get lowercase unicode characters
-	[[nodiscard]] bool operator<(const File& other) const;
+	[[nodiscard]] bool operator<(const File& other) const noexcept;
 
-	[[nodiscard]] bool operator==(const File& other) const
+	[[nodiscard]] bool operator==(const File& other) const noexcept
 	{
 		return m_file_name == other.m_file_name;
 	}

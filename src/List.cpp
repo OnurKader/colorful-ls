@@ -7,6 +7,8 @@
 #include <vector>
 
 // FIXME: Dead link size thing is broken!
+// TODO: Add a directory_entry constructor for file or make a FileVector class that holds a vec and
+// does the printing and shit
 
 namespace fs = std::filesystem;
 

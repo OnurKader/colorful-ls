@@ -8,7 +8,7 @@
 // Sorry for this!
 #include <sys/stat.h>
 
-using namespace fmt::literals;
+// TODO: Compile the format string, <fmt/compile.hpp>
 
 namespace OK
 {
@@ -23,42 +23,29 @@ File::File(const fs::path file_path) :
 	}
 	else if(fs::exists(m_file_path))
 	{
-		// We're making File's, how can the path not exist
-		m_file_size = fs::file_size(m_file_path);
+		std::error_code ec;
+		const auto file_size_or_error = fs::file_size(m_file_path, ec);
+		if(file_size_or_error != static_cast<std::uintmax_t>(-1LL))
+			m_file_size = file_size_or_error;
+	}
+	else
+	{
+		m_file_size = 0ULL;
 	}
 
 	m_file_name.erase(0ULL, m_file_name.find_last_of('/') + 1ULL);
+
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 }
 
-File::File(File&& other) :
-	m_file_path {std::move(other.m_file_path)},
-	m_file_type {std::move(other.m_file_type)},
-	m_file_name {std::move(other.m_file_name)},
-	m_file_size {std::move(other.m_file_size)},
-	m_extension {std::move(other.m_extension)},
-	m_icon {std::move(other.m_icon)},
-	m_color {std::move(other.m_color)},
-	m_indicator {std::move(other.m_indicator)}
-{
-	// MAYBE: Default this constructor?
-}
+File::File(File&& other) = default;
 
-File& File::operator=(File&& other)
-{
-	m_file_path = std::move(other.m_file_path);
-	m_file_type = std::move(other.m_file_type);
-	m_file_size = std::move(other.m_file_size);
-	m_file_name = std::move(other.m_file_name);
-	m_extension = std::move(other.m_extension);
-	m_color = std::move(other.m_color);
-	m_icon = std::move(other.m_icon);
-	m_indicator = std::move(other.m_indicator);
+File& File::operator=(File&& other) = default;
 
-	return *this;
-}
-
+// These can be improved, no need to use a string for these, or a wstring
+// Just wchar_t[256] and char[256] should do it.
+// ???:
 inline std::wstring mb_to_wstring(const std::string& mb_str)
 {
 	std::wstring temp_wide(mb_str.size(), L'\0');
@@ -88,8 +75,7 @@ inline std::string mb_lower(const std::string& mb_str)
 	return w_to_mbstring(temp);
 }
 
-// FIXME: Change this to check properly
-bool File::operator<(const File& other) const
+bool File::operator<(const File& other) const noexcept
 {
 	// Do checks for symlinks
 	using ft = fs::file_type;
@@ -138,11 +124,10 @@ std::string File::to_string(const ParsedOptions po) const noexcept
 		return Color::rgb(0, 255, 255);
 	}();
 
-	// TODO: Add long listing format with user group info and time and perms
 	// TODO: Symlink point stuff
 	// FIXME: Change this 5 to the maximum length of the sizes
 	return fmt::format("  {}  {}  {} {}{:>5}{}  {}  {}\n",
-					   this->get_perms_as_string(),
+					   get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
 					   size_color,
@@ -317,9 +302,7 @@ std::string File::get_modification_time() const noexcept
 	// TODO: Find the difference of modify_time and now(), get a color according to that
 
 	struct stat temp_stat;
-	// Just do stat() for now, if dead links create an issue, switch to lstat
-	// What about statx()
-	stat(m_file_name.c_str(), &temp_stat);
+	lstat(m_file_name.c_str(), &temp_stat);
 	const auto modify_time = temp_stat.st_mtim.tv_sec;
 	std::string result = std::ctime(&modify_time);
 	result.erase(result.end() - 1ULL);
