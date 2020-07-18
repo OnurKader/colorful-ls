@@ -166,111 +166,81 @@ std::size_t mb_strlen(const std::string& str)
 
 uint64_t File::string_length() const noexcept
 {
-	std::size_t total_length = 0ULL;
-	total_length += 2ULL;
+	std::size_t total_length = 1ULL;
+	total_length += m_icon.size();
 	total_length += mb_strlen(m_file_name);
 	total_length += m_indicator.size();
 	return total_length;
 }
 
-// WOW This is fucking ugly!
 std::string File::get_perms_as_string() const noexcept
 {
-	// MAYBE: make the else a function, or just pass in the bool and the permission?
 	std::string result;
-	result.reserve(225ULL);
+	result.reserve(206UL);
 	fs::perms perm = fs::symlink_status(m_file_path).permissions();
-	if((perm & fs::perms::owner_read) != fs::perms::none)
-	{
-		result.append(Color::PERM_READ);
-		result.push_back('r');
-	}
-	else
-	{
+
+	const auto no_perm_l = [&result] {
 		result.append(Color::PERM_NONE);
 		result.push_back('-');
+	};
+
+	const auto handle_specific_perm_l = [&result](fs::perms permission) {
+		switch(permission)
+		{
+			case fs::perms::owner_read: [[fallthrough]];
+			case fs::perms::group_read: [[fallthrough]];
+			case fs::perms::others_read:
+			{
+				result.append(Color::PERM_READ);
+				result.push_back('r');
+				break;
+			}
+
+			case fs::perms::owner_write: [[fallthrough]];
+			case fs::perms::group_write: [[fallthrough]];
+			case fs::perms::others_write:
+			{
+				result.append(Color::PERM_WRITE);
+				result.push_back('w');
+				break;
+			}
+
+			case fs::perms::owner_exec: [[fallthrough]];
+			case fs::perms::group_exec: [[fallthrough]];
+			case fs::perms::others_exec:
+			{
+				result.append(Color::PERM_EXEC);
+				result.push_back('x');
+				break;
+			}
+			default: fmt::print("What are you doing here with that permission boy!\n");
+		}
+	};
+
+#define PERM_STRING(p)                \
+	if((perm & p) != fs::perms::none) \
+	{                                 \
+		handle_specific_perm_l(p);    \
+	}                                 \
+	else                              \
+	{                                 \
+		no_perm_l();                  \
 	}
-	if((perm & fs::perms::owner_write) != fs::perms::none)
-	{
-		result.append(Color::PERM_WRITE);
-		result.push_back('w');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::owner_exec) != fs::perms::none)
-	{
-		result.append(Color::PERM_EXEC);
-		result.push_back('x');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::group_read) != fs::perms::none)
-	{
-		result.append(Color::PERM_READ);
-		result.push_back('r');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::group_write) != fs::perms::none)
-	{
-		result.append(Color::PERM_WRITE);
-		result.push_back('w');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::group_exec) != fs::perms::none)
-	{
-		result.append(Color::PERM_EXEC);
-		result.push_back('x');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::others_read) != fs::perms::none)
-	{
-		result.append(Color::PERM_READ);
-		result.push_back('r');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::others_write) != fs::perms::none)
-	{
-		result.append(Color::PERM_WRITE);
-		result.push_back('w');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
-	if((perm & fs::perms::others_exec) != fs::perms::none)
-	{
-		result.append(Color::PERM_EXEC);
-		result.push_back('x');
-	}
-	else
-	{
-		result.append(Color::PERM_NONE);
-		result.push_back('-');
-	}
+
+	PERM_STRING(fs::perms::owner_read);
+	PERM_STRING(fs::perms::owner_write);
+	PERM_STRING(fs::perms::owner_exec);
+	PERM_STRING(fs::perms::group_read);
+	PERM_STRING(fs::perms::group_write);
+	PERM_STRING(fs::perms::group_exec);
+	PERM_STRING(fs::perms::others_read);
+	PERM_STRING(fs::perms::others_write);
+	PERM_STRING(fs::perms::others_exec);
+
+#undef PERM_STRING
+
 	result.append(Color::RESET);
+
 	return result;
 }
 
