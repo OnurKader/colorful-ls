@@ -25,7 +25,7 @@ uint16_t get_term_width() noexcept
 void FileVec::print_columnal() const
 {
 	const auto term_width = get_term_width();
-	std::size_t total_file_name_length = m_files.front().string_length();
+	std::size_t total_file_name_length = m_files.front().string_length() + 4ULL;
 
 	const auto longest_string_file =
 		std::max_element(m_files.cbegin(),
@@ -46,15 +46,29 @@ void FileVec::print_columnal() const
 
 	fmt::print("    ");
 	const auto column_count = term_width / longest_string_length;
-	for(std::size_t i = 0ULL; i < column_count; ++i)
+	const auto row_count = total_file_name_length / column_count;
+	for(std::size_t j = 0ULL; j < row_count; ++j)
 	{
-		const auto& file_string = m_files[i].icon_and_color_filename();
-		const auto width = longest_string_file->icon_and_color_filename_length();
+		for(std::size_t i = 0ULL; i < column_count; ++i)
+		{
+			const auto index = i + j * column_count;
+			if(index >= m_files.size())
+			{
+				fmt::print("\n");
+				return;
+			}
 
-		fmt::print(FMT_STRING("{:{}}"), file_string, width + 4ULL);
+			const auto& file_string = m_files[index].icon_and_color_filename();
+			const auto width = longest_string_file->icon_and_color_filename_length();
+
+			fmt::print(FMT_STRING("{:{}}"), file_string, width);
+		}
+		fmt::print("\n    ");
 	}
 
 	fmt::print("\n");
+
+	fmt::print("Longest: {}\n", longest_string_file->icon_and_color_filename());
 }
 
 void FileVec::print_one_liner() const
