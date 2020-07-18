@@ -29,8 +29,8 @@ public:
 	[[nodiscard]] std::size_t size() const noexcept { return m_file_size; }
 	[[nodiscard]] fs::file_type type() const noexcept { return m_file_type; }
 
-	[[nodiscard]] std::string to_string(const ParsedOptions) const noexcept;
-	[[nodiscard]] std::size_t string_length(const bool long_listing) const noexcept;
+	[[nodiscard]] std::string long_name_to_string(const ParsedOptions) const noexcept;
+	[[nodiscard]] uint64_t string_length() const noexcept;
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
 	[[nodiscard]] std::string get_size_as_string(const bool human,
 												 const bool kibi = false) const noexcept;

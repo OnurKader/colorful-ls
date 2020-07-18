@@ -110,13 +110,8 @@ std::string File::icon_and_color_filename() const noexcept
 		FMT_STRING("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
-std::string File::to_string(const ParsedOptions po) const noexcept
+std::string File::long_name_to_string(const ParsedOptions po) const noexcept
 {
-	if(!po.long_listing)
-	{
-		return icon_and_color_filename();
-	}
-
 	// Because I'm doing {:>5} for size, this can't be inside the size string calculation
 	// Extract this into a function with 2 params, size, po.kibi
 
@@ -163,18 +158,13 @@ std::size_t mb_strlen(const std::string& str)
 	return char_count;
 }
 
-std::size_t File::string_length(const bool long_listing) const noexcept
+uint64_t File::string_length() const noexcept
 {
-	if(!long_listing)
-	{
-		std::size_t total_length = 0ULL;
-		total_length += 2ULL;
-		total_length += mb_strlen(m_file_name);
-		total_length += m_indicator.size();
-		return total_length;
-	}
-
-	return 0ULL;
+	std::size_t total_length = 0ULL;
+	total_length += 2ULL;
+	total_length += mb_strlen(m_file_name);
+	total_length += m_indicator.size();
+	return total_length;
 }
 
 // WOW This is fucking ugly!

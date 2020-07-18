@@ -1,5 +1,6 @@
 #include "Args.hpp"
 #include "File.hpp"
+#include "FileVec.hpp"
 
 #include <clocale>
 #include <filesystem>
@@ -8,8 +9,6 @@
 
 // TODO: Add a directory_entry constructor for file or make a FileVector class that holds a vec and
 // does the printing and shit
-
-namespace fs = std::filesystem;
 
 int main(int argc, char** argv)
 {
@@ -35,7 +34,7 @@ int main(int argc, char** argv)
 			std::distance(std::filesystem::directory_iterator {input_file.path()},
 						  std::filesystem::directory_iterator {});
 
-		if(num_of_files_in_directory == 0U)
+		if(num_of_files_in_directory == 0L)
 		{
 			fmt::print(stderr,
 					   FMT_STRING("    {}Nothing to show here...\n"),
@@ -43,26 +42,14 @@ int main(int argc, char** argv)
 			return 0;
 		}
 
-		std::vector<OK::File> files;
-		files.reserve(static_cast<std::size_t>(num_of_files_in_directory));
-
 		// The actual printing
+		OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results.all};
 
-		/*
-		std::vector<OK::File> asd(
-			(fs::directory_iterator(input_file.path()), fs::directory_iterator()));
-		*/
-		for(const auto& path: fs::directory_iterator(input_file.path()))
-			files.emplace_back(path);
-
-		std::sort(files.begin(), files.end());
-
-		for(const auto& file: files)
-			fmt::print("{}", file.to_string(results));
+		file_vec.print(results);
 	}
 	else
 	{
-		fmt::print("{}", input_file.to_string(results));
+		fmt::print("{}", input_file.long_name_to_string(results));
 	}
 
 	return 0;
