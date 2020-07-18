@@ -39,5 +39,6 @@ private:
 
 	void print_long(ParsedOptions) const;
 	void print_columnal() const;
+	void print_one_liner() const;
 };
 }	 // namespace OK

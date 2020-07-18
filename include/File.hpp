@@ -30,6 +30,8 @@ public:
 	[[nodiscard]] fs::file_type type() const noexcept { return m_file_type; }
 
 	[[nodiscard]] std::string long_name_to_string(const ParsedOptions) const noexcept;
+	[[nodiscard]] std::string icon_and_color_filename() const noexcept;
+	[[nodiscard]] uint64_t icon_and_color_filename_length() const noexcept;
 	[[nodiscard]] uint64_t string_length() const noexcept;
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
 	[[nodiscard]] std::string get_size_as_string(const bool human,
@@ -57,7 +59,6 @@ private:
 	std::string_view m_indicator;
 
 	void handle_icon_and_color() noexcept;
-	[[nodiscard]] std::string icon_and_color_filename() const noexcept;
 };
 
 }	 // namespace OK

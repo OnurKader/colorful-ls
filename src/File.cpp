@@ -110,6 +110,12 @@ std::string File::icon_and_color_filename() const noexcept
 		FMT_STRING("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
+uint64_t File::icon_and_color_filename_length() const noexcept
+{
+	return (m_color.size() + m_icon.size() + m_file_name.size() + Color::RESET.size() +
+			m_indicator.size());
+}
+
 std::string File::long_name_to_string(const ParsedOptions po) const noexcept
 {
 	// Because I'm doing {:>5} for size, this can't be inside the size string calculation
