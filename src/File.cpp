@@ -304,9 +304,10 @@ void File::handle_icon_and_color() noexcept
 		case fs::file_type::regular:
 		{
 			m_color = Color::FILE;
-			// TODO: Check for executable perm and put an asterisk here
 			if((fs::status(m_file_path).permissions() & fs::perms::owner_exec) != fs::perms::none)
 				m_indicator = "*";
+			else
+				m_indicator = " ";
 			return;
 		}
 		case fs::file_type::symlink:
