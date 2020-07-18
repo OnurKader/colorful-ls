@@ -8,8 +8,6 @@
 // Sorry for this!
 #include <sys/stat.h>
 
-// TODO: Compile the format string, <fmt/compile.hpp>
-
 namespace OK
 {
 File::File(const fs::path file_path) :
@@ -79,7 +77,6 @@ inline std::string mb_lower(const std::string& mb_str)
 
 bool File::operator<(const File& other) const noexcept
 {
-	// Do checks for symlinks
 	using ft = fs::file_type;
 	ft this_type = m_file_type;
 	if(fs::is_symlink(m_file_path))
@@ -90,16 +87,27 @@ bool File::operator<(const File& other) const noexcept
 	}
 
 	if(this_type == ft::directory && other.m_file_type != ft::directory)
+	{
 		return true;
+	}
 	else if(this_type != ft::directory && other.m_file_type == ft::directory)
+	{
 		return false;
+	}
 	else
-		return mb_lower(m_file_name) < mb_lower(other.m_file_name);
+	{
+		const auto& lhs = mb_lower(m_file_name);
+		const auto& rhs = mb_lower(other.m_file_name);
+		const auto retval = strverscmp(lhs.c_str(), rhs.c_str());
+
+		return retval < 0;
+	}
 }
 
 std::string File::icon_and_color_filename() const noexcept
 {
-	return fmt::format("{}{}{}{}{}", m_color, m_icon, m_file_name, Color::RESET, m_indicator);
+	return fmt::format(
+		FMT_STRING("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
 std::string File::to_string(const ParsedOptions po) const noexcept
@@ -128,7 +136,7 @@ std::string File::to_string(const ParsedOptions po) const noexcept
 
 	// TODO: Symlink point stuff
 	// FIXME: Change this 5 to the maximum length of the sizes
-	return fmt::format("  {}  {}  {} {}{:>5}{}  {}  {}\n",
+	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>5}{}  {}  {}\n"),
 					   get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
