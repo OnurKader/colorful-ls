@@ -6,7 +6,6 @@
 #include <fmt/format.h>
 #include <vector>
 
-// FIXME: Dead link size thing is broken!
 // TODO: Add a directory_entry constructor for file or make a FileVector class that holds a vec and
 // does the printing and shit
 
@@ -24,8 +23,10 @@ int main(int argc, char** argv)
 	OK::File input_file {argc == 1 ? "." : argv[1]};
 	if(!fs::exists(input_file.path()))
 	{
-		fmt::print(
-			stderr, "    {}File or directory not found{}\n", OK::Color::RED, OK::Color::RESET);
+		fmt::print(stderr,
+				   FMT_STRING("    {}File or directory not found{}\n"),
+				   OK::Color::RED,
+				   OK::Color::RESET);
 		return 1;
 	}
 	else if(fs::is_directory(input_file.path()))
@@ -36,7 +37,9 @@ int main(int argc, char** argv)
 
 		if(num_of_files_in_directory == 0U)
 		{
-			fmt::print(stderr, "    {}Nothing to show here...\n", OK::Color::rgb(229, 195, 38));
+			fmt::print(stderr,
+					   FMT_STRING("    {}Nothing to show here...\n"),
+					   OK::Color::rgb(229, 195, 38));
 			return 0;
 		}
 

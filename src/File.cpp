@@ -156,7 +156,8 @@ std::size_t mb_strlen(const std::string& str)
 	const std::size_t max_length = str.size();
 	while(curr_length < max_length)
 	{
-		curr_length += std::mblen(&c_str[curr_length], max_length - curr_length);
+		curr_length +=
+			static_cast<std::size_t>(std::mblen(&c_str[curr_length], max_length - curr_length));
 		char_count += 1;
 	}
 	return char_count;
@@ -287,7 +288,8 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 
 	const size_t base = kibi ? 1024 : 1000;
 	if(m_file_size < base)
-		return fmt::format("{}{}", m_file_size, kibi ? kibi_sizes.front() : si_sizes.front());
+		return fmt::format(
+			FMT_STRING("{}{}"), m_file_size, kibi ? kibi_sizes.front() : si_sizes.front());
 
 	size_t size = m_file_size;
 	size_t power_counter = 0ULL;
@@ -311,11 +313,10 @@ std::string File::get_modification_time() const noexcept
 
 	// TODO: Find the difference of modify_time and now(), get a color according to that
 
-	// FIXME: Only works with current directory ???
-
+	// FIXME: Dead links are 1970 :/
 	struct stat temp_stat;
-	lstat(m_file_name.c_str(), &temp_stat);
-	const auto modify_time = temp_stat.st_mtim.tv_sec;
+	stat(m_file_path.c_str(), &temp_stat);
+	const auto& modify_time = temp_stat.st_mtim.tv_sec;
 	std::string result = std::ctime(&modify_time);
 	result.erase(result.end() - 1ULL);
 	return result;
