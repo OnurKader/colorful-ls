@@ -1,6 +1,7 @@
 #include "Args.hpp"
 #include "File.hpp"
 #include "FileVec.hpp"
+#include "Utils.hpp"
 
 #include <clocale>
 #include <filesystem>
@@ -12,6 +13,7 @@
 
 int main(int argc, char** argv)
 {
+	Timer timer {"The whole shebang"};
 	std::setlocale(LC_ALL, "");
 	OK::Args args;
 	const auto results_opt = args.parse(argc, argv);
