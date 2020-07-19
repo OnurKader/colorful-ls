@@ -6,7 +6,10 @@
 #include <fmt/format.h>
 
 // Sorry for this!
+#include <grp.h>
+#include <pwd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 namespace OK
 {
@@ -38,6 +41,9 @@ File::File(const fs::path file_path) :
 
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
+
+	m_username = getpwuid(geteuid())->pw_name;
+	m_groupname = getgrgid(geteuid())->gr_name;
 }
 
 File::File(File&& other) = default;

@@ -59,6 +59,8 @@ private:
 	std::string_view m_icon;
 	std::string_view m_color;
 	std::string_view m_indicator;
+	std::string m_username;
+	std::string m_groupname;
 
 	mutable std::string m_time_color;
 
