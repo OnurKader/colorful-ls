@@ -52,7 +52,10 @@ int main(int argc, char** argv)
 	else
 	{
 		fmt::print("{}",
-				   input_file.long_name_to_string(results, input_file.get_size_digit_count()));
+				   input_file.long_name_to_string(results,
+												  input_file.get_size_digit_count(),
+												  input_file.username().size(),
+												  input_file.groupname().size()));
 	}
 
 	return 0;

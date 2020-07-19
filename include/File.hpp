@@ -28,9 +28,14 @@ public:
 	[[nodiscard]] fs::path path() const noexcept { return m_file_path; }
 	[[nodiscard]] std::size_t size() const noexcept { return m_file_size; }
 	[[nodiscard]] fs::file_type type() const noexcept { return m_file_type; }
+	[[nodiscard]] const std::string& username() const noexcept { return m_username; }
+	[[nodiscard]] const std::string& groupname() const noexcept { return m_groupname; }
 
-	[[nodiscard]] std::string long_name_to_string(ParsedOptions,
-												  std::size_t size_digit_count) const noexcept;
+	[[nodiscard]] std::string long_name_to_string(
+		ParsedOptions,
+		std::size_t size_digit_count,
+		std::size_t longest_username_length,
+		std::size_t longest_groupname_length) const noexcept;
 	[[nodiscard]] std::string icon_and_color_filename() const noexcept;
 	[[nodiscard]] uint64_t icon_and_color_filename_length() const noexcept;
 	[[nodiscard]] uint64_t string_length() const noexcept;

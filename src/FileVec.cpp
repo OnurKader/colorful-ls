@@ -13,7 +13,9 @@ void FileVec::print_long(ParsedOptions options) const
 
 	for(const auto& file: m_files)
 	{
-		fmt::print(FMT_STRING("{}"), file.long_name_to_string(options, m_longest_file_size));
+		fmt::print(FMT_STRING("{}"),
+				   file.long_name_to_string(
+					   options, m_longest_file_size, m_longest_username, m_longest_groupname));
 	}
 }
 

@@ -16,8 +16,10 @@ public:
 			for(const auto& path: fs::directory_iterator(input_file.path()))
 			{
 				m_files.emplace_back(path);
-				m_longest_file_size =
-					std::max(m_longest_file_size, m_files.back().get_size_digit_count());
+				const auto& back = m_files.back();
+				m_longest_file_size = std::max(m_longest_file_size, back.get_size_digit_count());
+				m_longest_username = std::max(m_longest_username, back.username().size());
+				m_longest_groupname = std::max(m_longest_groupname, back.groupname().size());
 			}
 		}
 		else
@@ -44,6 +46,8 @@ public:
 private:
 	std::vector<File> m_files {};
 	mutable std::size_t m_longest_file_size {1ULL};
+	mutable std::size_t m_longest_username {1ULL};
+	mutable std::size_t m_longest_groupname {1ULL};
 
 	void print_long(ParsedOptions) const;
 	void print_columnal() const;

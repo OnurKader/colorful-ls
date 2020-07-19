@@ -42,8 +42,14 @@ File::File(const fs::path file_path) :
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 
-	m_username = getpwuid(geteuid())->pw_name;
-	m_groupname = getgrgid(geteuid())->gr_name;
+	// Username and Groupname stuff
+	struct stat file_stat;
+	lstat(m_file_path.c_str(), &file_stat);
+	const struct passwd* pw = getpwuid(file_stat.st_uid);
+	const struct group* gr = getgrgid(file_stat.st_gid);
+
+	m_username = pw->pw_name;
+	m_groupname = gr->gr_name;
 }
 
 File::File(File&& other) = default;
@@ -122,7 +128,10 @@ uint64_t File::icon_and_color_filename_length() const noexcept
 	return (m_color.size() + 1ULL + m_file_name.size() + Color::RESET.size() + m_indicator.size());
 }
 
-std::string File::long_name_to_string(ParsedOptions po, std::size_t size_digit_count) const noexcept
+std::string File::long_name_to_string(ParsedOptions po,
+									  std::size_t size_digit_count,
+									  std::size_t longest_username,
+									  std::size_t longest_groupname) const noexcept
 {
 	// MAYBE: Extract this into a function with 2 params, size, po.kibi
 
@@ -143,10 +152,14 @@ std::string File::long_name_to_string(ParsedOptions po, std::size_t size_digit_c
 	const auto modification_time = get_modification_time();
 
 	// TODO: Symlink point stuff
-	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>{}}{}  {}{}{}  {}\n"),
+	return fmt::format(FMT_STRING("  {}  {:>{}}  {}{:>{}}{} {}{:>{}}{}  {}{}{}  {}\n"),
 					   get_perms_as_string(),
-					   "beronthecolossus",
-					   "beronthecolossus",
+					   m_username,
+					   longest_username,
+					   Color::rgb(207, 198, 104),
+					   m_groupname,
+					   longest_groupname,
+					   Color::RESET,
 					   size_color,
 					   get_size_as_string(po.human, po.kibi),
 					   size_digit_count,
@@ -296,11 +309,8 @@ std::string File::get_modification_time() const noexcept
 	return fmt::format("{}", format_time == nullptr ? "NULL" : format_time);
 	*/
 
-	// TODO: Find the difference of modify_time and now(), get a color according to that
-
-	// FIXME: Dead links are 1970 :/
 	struct stat temp_stat;
-	stat(m_file_path.c_str(), &temp_stat);
+	lstat(m_file_path.c_str(), &temp_stat);
 	const auto& modify_time = temp_stat.st_mtim.tv_sec;
 	std::string result = std::ctime(&modify_time);
 	result.erase(result.end() - 1ULL);
