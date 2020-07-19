@@ -13,9 +13,10 @@ struct Timer final
 	{
 		const int64_t duration_as_T =
 			std::chrono::duration_cast<std::chrono::microseconds>(hr_clock::now() - m_time).count();
-		fmt::print("{} took {} µs, {} ms\n", m_name, duration_as_T, duration_as_T / 1000L);
+		fmt::print(stderr, "{} took {} µs, {} ms\n", m_name, duration_as_T, duration_as_T / 1000L);
 	}
 
 	const hr_clock::time_point m_time;
 	const std::string_view m_name;
 };
+
