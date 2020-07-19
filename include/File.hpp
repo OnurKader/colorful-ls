@@ -67,6 +67,7 @@ private:
 	std::string m_username;
 	std::string m_groupname;
 
+	std::time_t m_modify_time;
 	mutable std::string m_time_color;
 
 	void handle_icon_and_color() noexcept;

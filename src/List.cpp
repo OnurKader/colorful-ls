@@ -8,9 +8,6 @@
 #include <fmt/format.h>
 #include <vector>
 
-// TODO: Add a directory_entry constructor for file or make a FileVector class that holds a vec and
-// does the printing and shit
-
 int main(int argc, char** argv)
 {
 	Timer timer {"The whole shebang"};
@@ -21,6 +18,10 @@ int main(int argc, char** argv)
 		return 69;
 	const auto results = results_opt.value();
 
+	// FIXME: put positional arguments in a vector and do printings for those, if it's a directory
+	// put the name of it above the listings
+
+	// MAYBE: Do CTRE regex stuff as an argument?
 	OK::File input_file {argc == 1 ? "." : argv[1]};
 	if(!fs::exists(input_file.path()))
 	{

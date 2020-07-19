@@ -50,6 +50,27 @@ File::File(const fs::path file_path) :
 
 	m_username = pw->pw_name;
 	m_groupname = gr->gr_name;
+
+	// Put all these commented sections into functions
+	// This is for modification time
+	struct stat temp_stat;
+	lstat(m_file_path.c_str(), &temp_stat);
+	m_modify_time = temp_stat.st_mtim.tv_sec;
+
+	// Color determination
+	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
+	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
+	// Why not just use chrono???
+	const auto now = std::time(nullptr);
+	const auto time_diff = now - m_modify_time;
+	if(time_diff > 3LL * DAY)
+		m_time_color = Color::rgb(32, 123, 121);
+	else if(time_diff > DAY)
+		m_time_color = Color::rgb(73, 144, 241);
+	else if(time_diff > 6 * HOUR)
+		m_time_color = Color::rgb(108, 222, 172);
+	else if(time_diff > HOUR)
+		m_time_color = Color::rgb(148, 242, 192);
 }
 
 File::File(File&& other) = default;
@@ -309,26 +330,8 @@ std::string File::get_modification_time() const noexcept
 	return fmt::format("{}", format_time == nullptr ? "NULL" : format_time);
 	*/
 
-	struct stat temp_stat;
-	lstat(m_file_path.c_str(), &temp_stat);
-	const auto& modify_time = temp_stat.st_mtim.tv_sec;
-	std::string result = std::ctime(&modify_time);
+	std::string result = std::ctime(&m_modify_time);
 	result.erase(result.end() - 1ULL);
-
-	// Color determination
-	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
-	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
-	// Why not just use chrono???
-	const auto now = std::time(nullptr);
-	const auto time_diff = now - modify_time;
-	if(time_diff > 3LL * DAY)
-		m_time_color = Color::rgb(32, 123, 121);
-	else if(time_diff > DAY)
-		m_time_color = Color::rgb(73, 144, 241);
-	else if(time_diff > 6 * HOUR)
-		m_time_color = Color::rgb(108, 222, 172);
-	else if(time_diff > HOUR)
-		m_time_color = Color::rgb(148, 242, 192);
 
 	return result;
 }
