@@ -112,8 +112,7 @@ std::string File::icon_and_color_filename() const noexcept
 
 uint64_t File::icon_and_color_filename_length() const noexcept
 {
-	return (m_color.size() + m_icon.size() + m_file_name.size() + Color::RESET.size() +
-			m_indicator.size());
+	return (m_color.size() + 1ULL + m_file_name.size() + Color::RESET.size() + m_indicator.size());
 }
 
 std::string File::long_name_to_string(const ParsedOptions po) const noexcept
@@ -166,8 +165,7 @@ std::size_t mb_strlen(const std::string& str)
 
 uint64_t File::string_length() const noexcept
 {
-	std::size_t total_length = 1ULL;
-	total_length += m_icon.size();
+	std::size_t total_length = mb_strlen(std::string(m_icon));
 	total_length += mb_strlen(m_file_name);
 	total_length += m_indicator.size();
 	return total_length;

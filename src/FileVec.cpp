@@ -44,31 +44,37 @@ void FileVec::print_columnal() const
 		return;
 	}
 
+	std::size_t offset = 4ULL;
+	if(term_width > longest_string_length)
+		offset = term_width % longest_string_length / (term_width / longest_string_length);
+
+	const auto column_count = longest_string_length + (offset > 4ULL ? offset : 4ULL) + 4ULL;
+	std::size_t current_cursor_pos = 4ULL;
+
 	fmt::print("    ");
-	const auto column_count = term_width / longest_string_length;
-	const auto row_count = total_file_name_length / column_count;
-	for(std::size_t j = 0ULL; j < row_count; ++j)
+	for(std::size_t i = 0ULL; i < m_files.size(); ++i)
 	{
-		for(std::size_t i = 0ULL; i < column_count; ++i)
+		const auto& file = m_files[i];
+		const auto& file_string = file.icon_and_color_filename();
+		const auto width = longest_string_file->icon_and_color_filename_length() + 4ULL;
+
+		current_cursor_pos += column_count;
+		const bool overflowed_line = (current_cursor_pos + column_count) >= term_width;
+		if(overflowed_line)
 		{
-			const auto index = i + j * column_count;
-			if(index >= m_files.size())
-			{
-				fmt::print("\n");
-				return;
-			}
-
-			const auto& file_string = m_files[index].icon_and_color_filename();
-			const auto width = longest_string_file->icon_and_color_filename_length();
-
+			if(i == m_files.size() - 1ULL)
+				fmt::print(FMT_STRING("{}\n"), file_string);
+			else
+				fmt::print(FMT_STRING("{}\n    "), file_string);
+			current_cursor_pos = 4ULL;
+		}
+		else
+		{
 			fmt::print(FMT_STRING("{:{}}"), file_string, width);
 		}
-		fmt::print("\n    ");
 	}
-
-	fmt::print("\n");
-
-	fmt::print("Longest: {}\n", longest_string_file->icon_and_color_filename());
+	if(current_cursor_pos > 4ULL)
+		fmt::print("\n");
 }
 
 void FileVec::print_one_liner() const
@@ -82,7 +88,6 @@ void FileVec::print(ParsedOptions options) const
 	if(options.long_listing)
 		print_long(options);
 	else if(options.one_line)
-
 		print_one_liner();
 	else
 		print_columnal();
