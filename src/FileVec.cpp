@@ -8,9 +8,12 @@ namespace OK
 {
 void FileVec::print_long(ParsedOptions options) const
 {
+	if(options.human)
+		m_longest_file_size = 4ULL;
+
 	for(const auto& file: m_files)
 	{
-		fmt::print(FMT_STRING("{}"), file.long_name_to_string(options));
+		fmt::print(FMT_STRING("{}"), file.long_name_to_string(options, m_longest_file_size));
 	}
 }
 

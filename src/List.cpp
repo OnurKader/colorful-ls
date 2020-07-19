@@ -49,7 +49,8 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		fmt::print("{}", input_file.long_name_to_string(results));
+		fmt::print("{}",
+				   input_file.long_name_to_string(results, input_file.get_size_digit_count()));
 	}
 
 	return 0;

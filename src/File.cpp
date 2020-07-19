@@ -115,10 +115,9 @@ uint64_t File::icon_and_color_filename_length() const noexcept
 	return (m_color.size() + 1ULL + m_file_name.size() + Color::RESET.size() + m_indicator.size());
 }
 
-std::string File::long_name_to_string(const ParsedOptions po) const noexcept
+std::string File::long_name_to_string(ParsedOptions po, std::size_t size_digit_count) const noexcept
 {
-	// Because I'm doing {:>5} for size, this can't be inside the size string calculation
-	// Extract this into a function with 2 params, size, po.kibi
+	// MAYBE: Extract this into a function with 2 params, size, po.kibi
 
 	// Unnecessary lambda is unnecessary
 	// MAYBE: change these to KiB if -k is provided, cause we have that here
@@ -135,13 +134,13 @@ std::string File::long_name_to_string(const ParsedOptions po) const noexcept
 	}();
 
 	// TODO: Symlink point stuff
-	// FIXME: Change this 5 to the maximum length of the sizes
-	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>5}{}  {}  {}\n"),
+	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>{}}{}  {}  {}\n"),
 					   get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
 					   size_color,
 					   get_size_as_string(po.human, po.kibi),
+					   size_digit_count,
 					   Color::RESET,
 					   get_modification_time(),
 					   icon_and_color_filename());
@@ -265,6 +264,17 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 
 	return fmt::format("{}{}", size, kibi ? kibi_sizes[power_counter] : si_sizes[power_counter]);
 }
+
+static constexpr std::size_t number_of_digits(std::size_t num) noexcept
+{
+	std::size_t digit_count = 1ULL;
+	while(num /= 10)
+		++digit_count;
+
+	return digit_count;
+}
+
+std::size_t File::get_size_digit_count() const noexcept { return number_of_digits(m_file_size); }
 
 std::string File::get_modification_time() const noexcept
 {
