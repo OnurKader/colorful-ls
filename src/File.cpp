@@ -13,7 +13,8 @@ namespace OK
 File::File(const fs::path file_path) :
 	m_file_path {file_path},
 	m_file_type {fs::symlink_status(m_file_path).type()},
-	m_file_name {file_path.string()}
+	m_file_name {file_path.string()},
+	m_time_color {Color::rgb(20, 255, 42)}
 {
 	if(fs::is_directory(m_file_path))
 	{
@@ -133,8 +134,10 @@ std::string File::long_name_to_string(ParsedOptions po, std::size_t size_digit_c
 		return Color::rgb(0, 255, 255);
 	}();
 
+	const auto modification_time = get_modification_time();
+
 	// TODO: Symlink point stuff
-	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>{}}{}  {}  {}\n"),
+	return fmt::format(FMT_STRING("  {}  {}  {} {}{:>{}}{}  {}{}{}  {}\n"),
 					   get_perms_as_string(),
 					   "beronthecolossus",
 					   "beronthecolossus",
@@ -142,7 +145,9 @@ std::string File::long_name_to_string(ParsedOptions po, std::size_t size_digit_c
 					   get_size_as_string(po.human, po.kibi),
 					   size_digit_count,
 					   Color::RESET,
-					   get_modification_time(),
+					   m_time_color,
+					   modification_time,
+					   Color::RESET,
 					   icon_and_color_filename());
 }
 
@@ -293,6 +298,22 @@ std::string File::get_modification_time() const noexcept
 	const auto& modify_time = temp_stat.st_mtim.tv_sec;
 	std::string result = std::ctime(&modify_time);
 	result.erase(result.end() - 1ULL);
+
+	// Color determination
+	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
+	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
+	// Why not just use chrono???
+	const auto now = std::time(nullptr);
+	const auto time_diff = now - modify_time;
+	if(time_diff > 3LL * DAY)
+		m_time_color = Color::rgb(32, 123, 121);
+	else if(time_diff > DAY)
+		m_time_color = Color::rgb(73, 144, 241);
+	else if(time_diff > 6 * HOUR)
+		m_time_color = Color::rgb(108, 222, 172);
+	else if(time_diff > HOUR)
+		m_time_color = Color::rgb(148, 242, 192);
+
 	return result;
 }
 

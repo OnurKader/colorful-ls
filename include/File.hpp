@@ -60,6 +60,8 @@ private:
 	std::string_view m_color;
 	std::string_view m_indicator;
 
+	mutable std::string m_time_color;
+
 	void handle_icon_and_color() noexcept;
 };
 

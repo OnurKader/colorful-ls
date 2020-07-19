@@ -31,7 +31,7 @@ static constexpr std::string_view PERM_NONE {"\033[38;2;088;040;128m"};
 
 static constexpr std::string_view m_rgb_template {"\033[38;2;{:03};{:03};{:03}m"};
 
-inline std::string rgb(const uint8_t r, const uint8_t g, const uint8_t b)
+inline std::string rgb(uint8_t r, uint8_t g, uint8_t b) noexcept
 {
 	return fmt::format(m_rgb_template, r, g, b);
 }
