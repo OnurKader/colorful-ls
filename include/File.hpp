@@ -31,6 +31,7 @@ public:
 	[[nodiscard]] const std::string& username() const noexcept { return m_username; }
 	[[nodiscard]] const std::string& groupname() const noexcept { return m_groupname; }
 
+	// Really 4 arguments?
 	[[nodiscard]] std::string long_name_to_string(
 		ParsedOptions,
 		std::size_t size_digit_count,

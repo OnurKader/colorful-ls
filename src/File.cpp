@@ -92,6 +92,8 @@ inline std::wstring mb_to_wstring(const std::string& mb_str)
 	return temp_wide;
 }
 
+// FIXME: Do the char array first then cache the lowercase strings in the file so when they are
+// sorted nothing has to be calculated more than once
 inline void ws_tolower(std::wstring& wstr)
 {
 	std::transform(wstr.begin(), wstr.end(), wstr.begin(), [loc = std::locale {""}](const auto& c) {
@@ -196,6 +198,7 @@ std::string File::long_name_to_string(ParsedOptions po,
 					   icon_and_color_filename());
 }
 
+// fmt::detail::count_code_points
 // Thanks https://stackoverflow.com/a/18850689, @user2781185
 std::size_t mb_strlen(const std::string& str)
 {
