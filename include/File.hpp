@@ -67,6 +67,8 @@ private:
 	std::string m_username;
 	std::string m_groupname;
 
+	std::string m_mb_lowercase_name;
+
 	std::time_t m_modify_time;
 	mutable std::string m_time_color;
 

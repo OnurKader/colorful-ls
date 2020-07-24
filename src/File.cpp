@@ -13,6 +13,8 @@
 
 namespace OK
 {
+inline std::string mb_lower(const std::string& mb_str);
+
 File::File(const fs::path file_path) :
 	m_file_path {file_path},
 	m_file_type {fs::symlink_status(m_file_path).type()},
@@ -41,6 +43,8 @@ File::File(const fs::path file_path) :
 
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
+
+	m_mb_lowercase_name = mb_lower(m_file_name);
 
 	// Username and Groupname stuff
 	struct stat file_stat;
@@ -130,8 +134,9 @@ bool File::operator<(const File& other) const noexcept
 	}
 	else
 	{
-		const auto& lhs = mb_lower(m_file_name);
-		const auto& rhs = mb_lower(other.m_file_name);
+		// ???: Is this really necessary? Could we just do a naive ASCII to_lower function?
+		const auto& lhs = m_mb_lowercase_name;
+		const auto& rhs = other.m_mb_lowercase_name;
 		const auto retval = strverscmp(lhs.c_str(), rhs.c_str());
 
 		return retval < 0;
