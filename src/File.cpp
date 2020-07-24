@@ -84,24 +84,23 @@ File& File::operator=(File&& other) = default;
 // These can be improved, no need to use a string for these, or a wstring
 // Just wchar_t[256] and char[256] should do it.
 // ???:
-inline std::wstring mb_to_wstring(const std::string& mb_str)
+inline auto mb_to_wstring(const std::string& mb_str)
 {
-	std::wstring temp_wide(mb_str.size(), L'\0');
+	std::array<wchar_t, 128ULL> temp_wide {L'\0'};
 	// mbtowcs returns length of wstring, should we erase the last parts? Nah.
 	std::mbstowcs(temp_wide.data(), mb_str.data(), mb_str.size());
 	return temp_wide;
 }
 
-// FIXME: Do the char array first then cache the lowercase strings in the file so when they are
-// sorted nothing has to be calculated more than once
-inline void ws_tolower(std::wstring& wstr)
+// FIXME: Do the char array first
+inline void ws_tolower(std::array<wchar_t, 128ULL>& wstr)
 {
 	std::transform(wstr.begin(), wstr.end(), wstr.begin(), [loc = std::locale {""}](const auto& c) {
 		return std::tolower(c, loc);
 	});
 }
 
-inline std::string w_to_mbstring(const std::wstring& wstr)
+inline std::string w_to_mbstring(const std::array<wchar_t, 128ULL>& wstr)
 {
 	std::string temp_mb(wstr.size(), '\0');
 	std::wcstombs(temp_mb.data(), wstr.data(), wstr.size());
@@ -110,7 +109,7 @@ inline std::string w_to_mbstring(const std::wstring& wstr)
 
 inline std::string mb_lower(const std::string& mb_str)
 {
-	std::wstring temp = mb_to_wstring(mb_str);
+	auto temp = mb_to_wstring(mb_str);
 	ws_tolower(temp);
 	return w_to_mbstring(temp);
 }
