@@ -284,6 +284,7 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 	return fmt::format("{}{}", size, kibi ? kibi_sizes[power_counter] : si_sizes[power_counter]);
 }
 
+// Also an fmt function in ::detail
 static constexpr std::size_t number_of_digits(std::size_t num) noexcept
 {
 	std::size_t digit_count = 1ULL;

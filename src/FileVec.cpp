@@ -9,7 +9,12 @@ namespace OK
 void FileVec::print_long(ParsedOptions options) const
 {
 	if(options.human)
-		m_longest_file_size = 4ULL;
+	{
+		if(options.kibi)
+			m_longest_file_size = 5ULL;
+		else
+			m_longest_file_size = 4ULL;
+	}
 
 	for(const auto& file: m_files)
 	{
