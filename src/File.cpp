@@ -45,6 +45,7 @@ File::File(const fs::path file_path) :
 	handle_icon_and_color();
 
 	// ???: Is this really necessary? Could we just do a naive ASCII to_lower function?
+	// TODO: In the mb_* functions use fmt::detail::utf8_to_utf16 or whatever it's called
 	m_mb_lowercase_name = mb_lower(m_file_name);
 
 	// Username and Groupname stuff
@@ -82,6 +83,7 @@ File::File(File&& other) = default;
 
 File& File::operator=(File&& other) = default;
 
+// fmt FTW
 inline auto mb_to_wstring(const std::string& mb_str)
 {
 	std::array<wchar_t, 128ULL> temp_wide {L'\0'};
@@ -115,18 +117,27 @@ bool File::operator<(const File& other) const noexcept
 {
 	using ft = fs::file_type;
 	ft this_type = m_file_type;
-	if(fs::is_symlink(m_file_path))
+	ft other_type = other.m_file_type;
+
+	if(this_type == ft::symlink)
 	{
 		const auto followed_stat = fs::status(m_file_path);
 		if(fs::exists(followed_stat))
 			this_type = followed_stat.type();
 	}
 
-	if(this_type == ft::directory && other.m_file_type != ft::directory)
+	if(other_type == ft::symlink)
+	{
+		const auto followed_stat = fs::status(other.m_file_path);
+		if(fs::exists(followed_stat))
+			other_type = followed_stat.type();
+	}
+
+	if(this_type == ft::directory && other_type != ft::directory)
 	{
 		return true;
 	}
-	else if(this_type != ft::directory && other.m_file_type == ft::directory)
+	else if(this_type != ft::directory && other_type == ft::directory)
 	{
 		return false;
 	}
@@ -194,29 +205,14 @@ std::string File::long_name_to_string(ParsedOptions po,
 					   icon_and_color_filename());
 }
 
-// fmt::detail::count_code_points
-// Thanks https://stackoverflow.com/a/18850689, @user2781185
-std::size_t mb_strlen(const std::string& str)
-{
-	std::size_t curr_length = 0ULL;
-	const char* const c_str = str.c_str();
-	std::size_t char_count = 0ULL;
-	const std::size_t max_length = str.size();
-	while(curr_length < max_length)
-	{
-		curr_length +=
-			static_cast<std::size_t>(std::mblen(&c_str[curr_length], max_length - curr_length));
-		++char_count;
-	}
-
-	return char_count;
-}
+inline std::size_t mb_strlen(std::string_view str) { return fmt::detail::count_code_points(str); }
 
 uint64_t File::string_length() const noexcept
 {
-	std::size_t total_length = mb_strlen(std::string(m_icon));
+	std::size_t total_length = mb_strlen(m_icon);
 	total_length += mb_strlen(m_file_name);
 	total_length += m_indicator.size();
+	total_length += mb_strlen(m_indicator);
 	return total_length;
 }
 
