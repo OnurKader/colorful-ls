@@ -48,35 +48,11 @@ File::File(const fs::path file_path) :
 	// TODO: In the mb_* functions use fmt::detail::utf8_to_utf16 or whatever it's called
 	m_mb_lowercase_name = mb_lower(m_file_name);
 
-	// Username and Groupname stuff
-	struct stat file_stat;
-	lstat(m_file_path.c_str(), &file_stat);
-	const struct passwd* pw = getpwuid(file_stat.st_uid);
-	const struct group* gr = getgrgid(file_stat.st_gid);
+	// Stat the h*ck out of this file
+	lstat(m_file_path.c_str(), &m_lstat);
 
-	m_username = pw->pw_name;
-	m_groupname = gr->gr_name;
-
-	// Put all these commented sections into functions
-	// This is for modification time
-	struct stat temp_stat;
-	lstat(m_file_path.c_str(), &temp_stat);
-	m_modify_time = temp_stat.st_mtim.tv_sec;
-
-	// Color determination
-	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
-	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
-	// Why not just use chrono???
-	const auto now = std::time(nullptr);
-	const auto time_diff = now - m_modify_time;
-	if(time_diff > 3LL * DAY)
-		m_time_color = Color::rgb(32, 123, 121);
-	else if(time_diff > DAY)
-		m_time_color = Color::rgb(73, 144, 241);
-	else if(time_diff > 6 * HOUR)
-		m_time_color = Color::rgb(108, 222, 172);
-	else if(time_diff > HOUR)
-		m_time_color = Color::rgb(148, 242, 192);
+	handle_user_and_groupname();
+	handle_modify_time_and_color();
 }
 
 File::File(File&& other) = default;
@@ -404,6 +380,35 @@ void File::handle_icon_and_color() noexcept
 			return;
 		}
 	}
+}
+
+void File::handle_user_and_groupname()
+{
+	const struct passwd* pw = getpwuid(m_lstat.st_uid);
+	const struct group* gr = getgrgid(m_lstat.st_gid);
+
+	m_username = pw->pw_name;
+	m_groupname = gr->gr_name;
+}
+
+void File::handle_modify_time_and_color()
+{
+	m_modify_time = m_lstat.st_mtim.tv_sec;
+
+	// Color determination
+	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
+	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
+	// Why not just use chrono???
+	const auto now = std::time(nullptr);
+	const auto time_diff = now - m_modify_time;
+	if(time_diff > 3LL * DAY)
+		m_time_color = Color::rgb(32, 123, 121);
+	else if(time_diff > DAY)
+		m_time_color = Color::rgb(73, 144, 241);
+	else if(time_diff > 6 * HOUR)
+		m_time_color = Color::rgb(108, 222, 172);
+	else if(time_diff > HOUR)
+		m_time_color = Color::rgb(148, 242, 192);
 }
 
 }	 // namespace OK

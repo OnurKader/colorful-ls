@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <string_view>
+#include <sys/stat.h>
 
 // TODO: Check if the terminal supports TrueColor, if not check for 8-bit then use them
 // ^ It's just $COLORTERM on modern terminals (COLORTERM == truecolor)
@@ -73,7 +74,11 @@ private:
 	std::time_t m_modify_time;
 	mutable std::string m_time_color;
 
+	struct stat m_lstat;
+
 	void handle_icon_and_color() noexcept;
+	void handle_user_and_groupname();
+	void handle_modify_time_and_color();
 };
 
 }	 // namespace OK
