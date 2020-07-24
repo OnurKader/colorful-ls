@@ -7,6 +7,4 @@ _**TODO**_
 
 [{fmt}](https://github.com/fmtlib/fmt)
 
-I've put `cxxopts.hpp` in the `include/` directory, MIT License
-
-(cxxopts: Copyright (c) 2014, 2015, 2016, 2017 Jarryd Beck)
+[cxxopts](https://github.com/jarro2783/cxxopts)
