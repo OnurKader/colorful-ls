@@ -44,6 +44,7 @@ File::File(const fs::path file_path) :
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 
+	// ???: Is this really necessary? Could we just do a naive ASCII to_lower function?
 	m_mb_lowercase_name = mb_lower(m_file_name);
 
 	// Username and Groupname stuff
@@ -81,9 +82,6 @@ File::File(File&& other) = default;
 
 File& File::operator=(File&& other) = default;
 
-// These can be improved, no need to use a string for these, or a wstring
-// Just wchar_t[256] and char[256] should do it.
-// ???:
 inline auto mb_to_wstring(const std::string& mb_str)
 {
 	std::array<wchar_t, 128ULL> temp_wide {L'\0'};
@@ -92,7 +90,6 @@ inline auto mb_to_wstring(const std::string& mb_str)
 	return temp_wide;
 }
 
-// FIXME: Do the char array first
 inline void ws_tolower(std::array<wchar_t, 128ULL>& wstr)
 {
 	std::transform(wstr.begin(), wstr.end(), wstr.begin(), [loc = std::locale {""}](const auto& c) {
@@ -135,7 +132,6 @@ bool File::operator<(const File& other) const noexcept
 	}
 	else
 	{
-		// ???: Is this really necessary? Could we just do a naive ASCII to_lower function?
 		const auto& lhs = m_mb_lowercase_name;
 		const auto& rhs = other.m_mb_lowercase_name;
 		const auto retval = strverscmp(lhs.c_str(), rhs.c_str());
@@ -164,6 +160,7 @@ std::string File::long_name_to_string(ParsedOptions po,
 
 	// Unnecessary lambda is unnecessary
 	// MAYBE: change these to KiB if -k is provided, cause we have that here
+	// TODO: Move this to where the size is calculated, or just in the constructor
 	const std::string size_color = [&] {
 		if(m_file_size < 1'000'000ULL)	  // 1MB
 			return Color::rgb(255, 255, 255);
@@ -202,15 +199,16 @@ std::string File::long_name_to_string(ParsedOptions po,
 std::size_t mb_strlen(const std::string& str)
 {
 	std::size_t curr_length = 0ULL;
-	const char* c_str = str.c_str();
+	const char* const c_str = str.c_str();
 	std::size_t char_count = 0ULL;
 	const std::size_t max_length = str.size();
 	while(curr_length < max_length)
 	{
 		curr_length +=
 			static_cast<std::size_t>(std::mblen(&c_str[curr_length], max_length - curr_length));
-		char_count += 1;
+		++char_count;
 	}
+
 	return char_count;
 }
 
