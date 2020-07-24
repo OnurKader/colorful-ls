@@ -13,7 +13,7 @@ void FileVec::print_long(ParsedOptions options) const
 
 	for(const auto& file: m_files)
 	{
-		fmt::print(FMT_STRING("{}"),
+		fmt::print("{}",
 				   file.long_name_to_string(
 					   options, m_longest_file_size, m_longest_username, m_longest_groupname));
 	}
@@ -68,14 +68,14 @@ void FileVec::print_columnal() const
 		if(overflowed_line)
 		{
 			if(i == m_files.size() - 1ULL)
-				fmt::print(FMT_STRING("{}\n"), file_string);
+				fmt::print("{}\n", file_string);
 			else
-				fmt::print(FMT_STRING("{}\n    "), file_string);
+				fmt::print("{}\n    ", file_string);
 			current_cursor_pos = 4ULL;
 		}
 		else
 		{
-			fmt::print(FMT_STRING("{:{}}"), file_string, width);
+			fmt::print("{:{}}", file_string, width);
 		}
 	}
 	if(current_cursor_pos > 4ULL)

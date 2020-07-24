@@ -8,7 +8,6 @@
 // Sorry for this!
 #include <grp.h>
 #include <pwd.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 namespace OK
@@ -129,8 +128,7 @@ bool File::operator<(const File& other) const noexcept
 
 std::string File::icon_and_color_filename() const noexcept
 {
-	return fmt::format(
-		FMT_STRING("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
+	return fmt::format("{}{}{}{}{}", m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
 uint64_t File::icon_and_color_filename_length() const noexcept
@@ -273,8 +271,7 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 
 	const size_t base = kibi ? 1024 : 1000;
 	if(m_file_size < base)
-		return fmt::format(
-			FMT_STRING("{}{}"), m_file_size, kibi ? kibi_sizes.front() : si_sizes.front());
+		return fmt::format("{}{}", m_file_size, kibi ? kibi_sizes.front() : si_sizes.front());
 
 	size_t size = m_file_size;
 	size_t power_counter = 0ULL;

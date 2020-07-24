@@ -8,7 +8,7 @@ using hr_clock = std::chrono::high_resolution_clock;
 
 struct Timer final
 {
-	Timer(std::string_view name) : m_time {hr_clock::now()}, m_name {name} {}
+	explicit Timer(std::string_view name) : m_time {hr_clock::now()}, m_name {name} {}
 	~Timer()
 	{
 		const int64_t duration_as_T =
@@ -19,4 +19,3 @@ struct Timer final
 	const hr_clock::time_point m_time;
 	const std::string_view m_name;
 };
-
