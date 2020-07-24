@@ -158,8 +158,8 @@ uint64_t File::icon_and_color_filename_length() const noexcept
 
 std::string File::long_name_to_string(ParsedOptions po,
 									  std::size_t size_digit_count,
-									  std::size_t longest_username,
-									  std::size_t longest_groupname) const noexcept
+									  std::size_t longest_username_length,
+									  std::size_t longest_groupname_length) const noexcept
 {
 	// MAYBE: Extract this into a function with 2 params, size, po.kibi
 
@@ -183,10 +183,10 @@ std::string File::long_name_to_string(ParsedOptions po,
 	return fmt::format(FMT_STRING("  {}  {:>{}}  {}{:>{}}{} {}{:>{}}{}  {}{}{}  {}\n"),
 					   get_perms_as_string(),
 					   m_username,
-					   longest_username,
+					   longest_username_length,
 					   Color::rgb(207, 198, 104),
 					   m_groupname,
-					   longest_groupname,
+					   longest_groupname_length,
 					   Color::RESET,
 					   size_color,
 					   get_size_as_string(po.human, po.kibi),
