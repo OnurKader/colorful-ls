@@ -13,10 +13,13 @@
 
 // TODO: #include <unistd.h> isatty(STDOUT_FILENO), if so no colors
 
-namespace fs = std::filesystem;
-
 namespace OK
 {
+namespace fs = std::filesystem;
+
+template<std::size_t S>
+using cstring = std::array<char, S>;
+
 class File final
 {
 public:
@@ -61,6 +64,7 @@ private:
 	fs::file_type m_file_type;
 
 	// TODO: Make these std::strings into the right length std::array<char>'s
+	// MAYBE: Make a wrapper around an std::array<char>, or check out fmt, it must have one
 	std::string m_file_name;
 	std::size_t m_file_size;
 	std::string_view m_extension;
