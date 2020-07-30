@@ -10,14 +10,7 @@
 
 namespace OK
 {
-std::string tolower(const std::string& str)
-{
-	std::string result {str};
-	std::transform(
-		str.cbegin(), str.cend(), result.begin(), [](char chr) { return std::tolower(chr); });
-
-	return result;
-}
+std::string tolower(const std::string& str);
 
 File::File(const fs::path file_path) :
 	m_file_path {file_path},
@@ -374,6 +367,15 @@ void File::handle_modify_time_and_color()
 		m_time_color = Color::rgb(108, 222, 172);
 	else if(time_diff > HOUR)
 		m_time_color = Color::rgb(148, 242, 192);
+}
+
+std::string tolower(const std::string& str)
+{
+	std::string result {str};
+	std::transform(
+		str.cbegin(), str.cend(), result.begin(), [](char chr) { return std::tolower(chr); });
+
+	return result;
 }
 
 }	 // namespace OK
