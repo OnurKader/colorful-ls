@@ -7,6 +7,22 @@ namespace OK
 class FileVec final
 {
 public:
+	// TODO: Add proper directory listing for multiple inputs with the file names shown
+	FileVec(int argc, char** argv)
+	{
+		m_files.reserve(static_cast<std::size_t>(argc - 1));
+		for(int i = 1; i < argc; ++i)
+		{
+			m_files.emplace_back(argv[i]);
+			const auto& back = m_files.back();
+			m_longest_file_size = std::max(m_longest_file_size, back.get_size_digit_count());
+			m_longest_username = std::max(m_longest_username, back.username().size());
+			m_longest_groupname = std::max(m_longest_groupname, back.groupname().size());
+		}
+
+		std::sort(m_files.begin(), m_files.end());
+	}
+
 	FileVec(File&& input_file, ssize_t num_of_files, bool all_files)
 	{
 		m_files.reserve(static_cast<std::size_t>(num_of_files));
@@ -28,8 +44,10 @@ public:
 			{
 				if(path.path().filename().c_str()[0] != '.')
 					m_files.emplace_back(path);
-				m_longest_file_size =
-					std::max(m_longest_file_size, m_files.back().get_size_digit_count());
+				const auto& back = m_files.back();
+				m_longest_file_size = std::max(m_longest_file_size, back.get_size_digit_count());
+				m_longest_username = std::max(m_longest_username, back.username().size());
+				m_longest_groupname = std::max(m_longest_groupname, back.groupname().size());
 			}
 		}
 
