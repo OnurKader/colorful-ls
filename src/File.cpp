@@ -157,7 +157,7 @@ inline std::size_t mb_strlen(std::string_view str) { return fmt::detail::count_c
 
 uint64_t File::string_length() const noexcept
 {
-	std::size_t total_length = mb_strlen(m_icon);
+	uint64_t total_length = mb_strlen(m_icon);
 	total_length += mb_strlen(m_file_name);
 	total_length += m_indicator.size();
 	total_length += mb_strlen(m_indicator);
@@ -167,15 +167,15 @@ uint64_t File::string_length() const noexcept
 std::string File::get_perms_as_string() const noexcept
 {
 	std::string result;
-	result.reserve(206UL);
+	result.reserve(196UL);
 	fs::perms perm = fs::symlink_status(m_file_path).permissions();
 
-	const auto no_perm_l = [&result] {
+	const auto no_perm = [&result] {
 		result.append(Color::PERM_NONE);
 		result.push_back('-');
 	};
 
-	const auto handle_specific_perm_l = [&result](fs::perms permission) {
+	const auto handle_specific_perm = [&result](fs::perms permission) {
 		switch(permission)
 		{
 			case fs::perms::owner_read: [[fallthrough]];
@@ -211,11 +211,11 @@ std::string File::get_perms_as_string() const noexcept
 #define PERM_STRING(p)                \
 	if((perm & p) != fs::perms::none) \
 	{                                 \
-		handle_specific_perm_l(p);    \
+		handle_specific_perm(p);      \
 	}                                 \
 	else                              \
 	{                                 \
-		no_perm_l();                  \
+		no_perm();                    \
 	}
 
 	PERM_STRING(fs::perms::owner_read);
@@ -235,20 +235,20 @@ std::string File::get_perms_as_string() const noexcept
 	return result;
 }
 
-static constexpr std::array si_sizes {"B", "K", "M", "G", "T"};
-static constexpr std::array kibi_sizes {"Bi", "Ki", "Mi", "Gi", "Ti"};
+static constexpr std::array si_sizes {"B", "K", "M", "G", "T", "P", "E"};
+static constexpr std::array kibi_sizes {"Bi", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei"};
 
 std::string File::get_size_as_string(const bool human, const bool kibi) const noexcept
 {
 	if(!human)
 		return fmt::to_string(m_file_size);
 
-	const size_t base = kibi ? 1024 : 1000;
+	const std::size_t base = kibi ? 1024 : 1000;
 	if(m_file_size < base)
 		return fmt::format("{}{}", m_file_size, kibi ? kibi_sizes.front() : si_sizes.front());
 
-	size_t size = m_file_size;
-	size_t power_counter = 0ULL;
+	std::size_t size = m_file_size;
+	std::size_t power_counter = 0ULL;
 	while(size / 10ULL * 10ULL >= base)
 	{
 		size /= base;
@@ -268,7 +268,12 @@ static constexpr std::size_t number_of_digits(std::size_t num) noexcept
 	return digit_count;
 }
 
-std::size_t File::get_size_digit_count() const noexcept { return number_of_digits(m_file_size); }
+std::size_t File::get_size_digit_count() const noexcept
+{
+	// ???: AAAH
+	return static_cast<std::size_t>(fmt::detail::count_digits(m_file_size));
+	return number_of_digits(m_file_size);
+}
 
 std::string File::get_modification_time() const noexcept
 {

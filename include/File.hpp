@@ -60,6 +60,7 @@ private:
 	fs::path m_file_path;
 	fs::file_type m_file_type;
 
+	// TODO: Make these std::strings into the right length std::array<char>'s
 	std::string m_file_name;
 	std::size_t m_file_size;
 	std::string_view m_extension;
