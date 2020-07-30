@@ -22,39 +22,49 @@ int main(int argc, char** argv)
 	// put the name of it above the listings
 
 	// MAYBE: Do CTRE regex stuff as an argument?
-	OK::File input_file {argc == 1 ? "." : argv[1]};
-	if(!fs::exists(input_file.path()))
+	// man glob
+	const bool single_input = argc <= 2;
+	if(single_input)
 	{
-		fmt::print(
-			stderr, "    {}File or directory not found{}\n", OK::Color::RED, OK::Color::RESET);
-		return 1;
-	}
-	else if(fs::is_directory(input_file.path()))
-	{
-		const auto num_of_files_in_directory =
-			std::distance(std::filesystem::directory_iterator {input_file.path()},
-						  std::filesystem::directory_iterator {});
-
-		if(num_of_files_in_directory == 0L)
+		OK::File input_file {argc == 1 ? "." : argv[1]};
+		if(!fs::exists(input_file.path()))
 		{
-			fmt::print(stderr, "    {}Nothing to show here...\n", OK::Color::rgb(229, 195, 38));
-			return 0;
+			fmt::print(
+				stderr, "    {}File or directory not found{}\n", OK::Color::RED, OK::Color::RESET);
+			return 1;
 		}
+		else if(fs::is_directory(input_file.path()))
+		{
+			const auto num_of_files_in_directory =
+				std::distance(std::filesystem::directory_iterator {input_file.path()},
+							  std::filesystem::directory_iterator {});
 
-		// The actual printing
-		OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results.all};
+			if(num_of_files_in_directory == 0L)
+			{
+				fmt::print(stderr, "    {}Nothing to show here...\n", OK::Color::rgb(229, 195, 38));
+				return 0;
+			}
 
-		file_vec.print(results);
+			// The actual printing
+			OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results.all};
+
+			file_vec.print(results);
+		}
+		else
+		{
+			fmt::print("{}",
+					   input_file.long_name_to_string(results,
+													  input_file.get_size_digit_count(),
+													  input_file.username().size(),
+													  input_file.groupname().size()));
+		}
 	}
 	else
 	{
-		fmt::print("{}",
-				   input_file.long_name_to_string(results,
-												  input_file.get_size_digit_count(),
-												  input_file.username().size(),
-												  input_file.groupname().size()));
+		// Multiple inputs in argv, put them in a vector and print those
+		OK::FileVec file_vec {argc, argv};
+		file_vec.print(results);
 	}
 
 	return 0;
 }
-
