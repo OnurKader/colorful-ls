@@ -57,7 +57,6 @@ File& File::operator=(File&& other) = default;
 
 bool File::operator<(const File& other) const noexcept
 {
-	using ft = fs::file_type;
 	ft this_type = m_file_type;
 	ft other_type = other.m_file_type;
 
@@ -277,14 +276,15 @@ void File::handle_icon_and_color() noexcept
 	m_icon = icon_opt.value_or(default_file_icon);
 	switch(m_file_type)
 	{
-		case fs::file_type::directory:
+		case ft::directory:
 		{
 			m_icon = icon_opt.value_or(default_directory_icon);
 			m_color = Color::DIR;
 			m_indicator = "/";
 			return;
 		}
-		case fs::file_type::regular:
+
+		case ft::regular:
 		{
 			m_color = Color::FILE;
 			if((fs::status(m_file_path).permissions() & fs::perms::owner_exec) != fs::perms::none)
@@ -293,7 +293,7 @@ void File::handle_icon_and_color() noexcept
 				m_indicator = " ";
 			return;
 		}
-		case fs::file_type::symlink:
+		case ft::symlink:
 		{
 			// This only does one level of following, what if the file that's linked to is a link?
 			const auto followed_link = fs::read_symlink(m_file_path);
@@ -313,25 +313,25 @@ void File::handle_icon_and_color() noexcept
 			m_indicator = "@";
 			return;
 		}
-		case fs::file_type::socket:
+		case ft::socket:
 		{
 			m_color = Color::SOCK;
 			m_indicator = "=";
 			return;
 		}
-		case fs::file_type::fifo:
+		case ft::fifo:
 		{
 			m_color = Color::PIPE;
 			m_indicator = "|";
 			return;
 		}
-		case fs::file_type::block:
+		case ft::block:
 		{
 			m_color = Color::WHITE;
 			m_indicator = "\u2588";
 			return;
 		}
-		case fs::file_type::character:
+		case ft::character:
 		{
 			m_color = Color::WHITE;
 			m_indicator = "c";
