@@ -12,14 +12,10 @@
 // ^ It's just $COLORTERM on modern terminals (COLORTERM == truecolor)
 
 // TODO: #include <unistd.h> isatty(STDOUT_FILENO), if so no colors
+namespace fs = std::filesystem;
 
 namespace OK
 {
-namespace fs = std::filesystem;
-
-template<std::size_t S>
-using cstring = std::array<char, S>;
-
 class File final
 {
 public:
@@ -28,7 +24,7 @@ public:
 
 	File& operator=(File&&);
 
-	[[nodiscard]] std::string_view name() const noexcept { return m_file_name; }
+	[[nodiscard]] auto name() const noexcept { return m_file_name; }
 	[[nodiscard]] fs::path path() const noexcept { return m_file_path; }
 	[[nodiscard]] std::size_t size() const noexcept { return m_file_size; }
 	[[nodiscard]] fs::file_type type() const noexcept { return m_file_type; }
@@ -63,8 +59,6 @@ private:
 	fs::path m_file_path;
 	fs::file_type m_file_type;
 
-	// TODO: Make these std::strings into the right length std::array<char>'s
-	// MAYBE: Make a wrapper around an std::array<char>, or check out fmt, it must have one
 	std::string m_file_name;
 	std::size_t m_file_size;
 	std::string_view m_extension;
