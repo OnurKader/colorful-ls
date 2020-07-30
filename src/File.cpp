@@ -284,6 +284,10 @@ void File::handle_icon_and_color() noexcept
 			return;
 		}
 
+		// MAYBE: Do an assertion for these?
+		case ft::none: [[fallthrough]];
+		case ft::unknown: [[fallthrough]];
+		case ft::not_found: [[fallthrough]];
 		case ft::regular:
 		{
 			m_color = Color::FILE;
@@ -356,6 +360,7 @@ void File::handle_modify_time_and_color()
 	// Color determination
 	static constexpr long long HOUR = 60LL * 60LL;	  // An hour in seconds
 	static constexpr long long DAY = 24LL * HOUR;	  // A day in seconds
+
 	// Why not just use chrono???
 	const auto now = std::time(nullptr);
 	const auto time_diff = now - m_modify_time;
@@ -371,7 +376,8 @@ void File::handle_modify_time_and_color()
 
 std::string tolower(const std::string& str)
 {
-	std::string result {str};
+	std::string result(str.size(), '\0');
+	// MAYBE: just do a naive ASCII chr <= 'Z' && 'A' <= chr kinda stuff
 	std::transform(
 		str.cbegin(), str.cend(), result.begin(), [](char chr) { return std::tolower(chr); });
 

@@ -24,7 +24,7 @@ void FileVec::print_long(ParsedOptions options) const
 	}
 }
 
-uint16_t get_term_width() noexcept
+inline uint16_t get_term_width() noexcept
 {
 	struct winsize ws;
 	if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != 0)
