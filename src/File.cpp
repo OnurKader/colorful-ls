@@ -1,8 +1,6 @@
 #include "File.hpp"
 
 #include <algorithm>
-#include <cwchar>
-#include <fmt/chrono.h>
 #include <fmt/format.h>
 
 // Sorry for this!
@@ -12,7 +10,14 @@
 
 namespace OK
 {
-inline std::string mb_lower(const std::string& mb_str);
+std::string tolower(const std::string& str)
+{
+	std::string result {str};
+	std::transform(
+		str.cbegin(), str.cend(), result.begin(), [](char chr) { return std::tolower(chr); });
+
+	return result;
+}
 
 File::File(const fs::path file_path) :
 	m_file_path {file_path},
@@ -43,9 +48,8 @@ File::File(const fs::path file_path) :
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 
-	// ???: Is this really necessary? Could we just do a naive ASCII to_lower function?
 	// TODO: In the mb_* functions use fmt::detail::utf8_to_utf16 or whatever it's called
-	m_mb_lowercase_name = mb_lower(m_file_name);
+	m_lowercase_name = tolower(m_file_name);
 
 	// Stat the h*ck out of this file
 	lstat(m_file_path.c_str(), &m_lstat);
@@ -57,36 +61,6 @@ File::File(const fs::path file_path) :
 File::File(File&& other) = default;
 
 File& File::operator=(File&& other) = default;
-
-// fmt FTW
-inline auto mb_to_wstring(const std::string& mb_str)
-{
-	std::array<wchar_t, 128ULL> temp_wide {L'\0'};
-	// mbtowcs returns length of wstring, should we erase the last parts? Nah.
-	std::mbstowcs(temp_wide.data(), mb_str.data(), mb_str.size());
-	return temp_wide;
-}
-
-inline void ws_tolower(std::array<wchar_t, 128ULL>& wstr)
-{
-	std::transform(wstr.begin(), wstr.end(), wstr.begin(), [loc = std::locale {""}](const auto& c) {
-		return std::tolower(c, loc);
-	});
-}
-
-inline std::string w_to_mbstring(const std::array<wchar_t, 128ULL>& wstr)
-{
-	std::string temp_mb(wstr.size(), '\0');
-	std::wcstombs(temp_mb.data(), wstr.data(), wstr.size());
-	return temp_mb;
-}
-
-inline std::string mb_lower(const std::string& mb_str)
-{
-	auto temp = mb_to_wstring(mb_str);
-	ws_tolower(temp);
-	return w_to_mbstring(temp);
-}
 
 bool File::operator<(const File& other) const noexcept
 {
@@ -118,8 +92,8 @@ bool File::operator<(const File& other) const noexcept
 	}
 	else
 	{
-		const auto& lhs = m_mb_lowercase_name;
-		const auto& rhs = other.m_mb_lowercase_name;
+		const auto& lhs = m_lowercase_name;
+		const auto& rhs = other.m_lowercase_name;
 		const auto retval = strverscmp(lhs.c_str(), rhs.c_str());
 
 		return retval < 0;

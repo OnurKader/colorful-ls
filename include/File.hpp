@@ -72,7 +72,7 @@ private:
 	std::time_t m_modify_time;
 	mutable std::string m_time_color;
 
-	std::string m_mb_lowercase_name;
+	std::string m_lowercase_name;
 	struct stat m_lstat;
 
 	void handle_icon_and_color() noexcept;
