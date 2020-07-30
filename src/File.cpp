@@ -258,21 +258,9 @@ std::string File::get_size_as_string(const bool human, const bool kibi) const no
 	return fmt::format("{}{}", size, kibi ? kibi_sizes[power_counter] : si_sizes[power_counter]);
 }
 
-// Also an fmt function in ::detail
-static constexpr std::size_t number_of_digits(std::size_t num) noexcept
-{
-	std::size_t digit_count = 1ULL;
-	while(num /= 10)
-		++digit_count;
-
-	return digit_count;
-}
-
 std::size_t File::get_size_digit_count() const noexcept
 {
-	// ???: AAAH
 	return static_cast<std::size_t>(fmt::detail::count_digits(m_file_size));
-	return number_of_digits(m_file_size);
 }
 
 std::string File::get_modification_time() const noexcept
