@@ -36,6 +36,7 @@ File::File(const fs::path file_path) :
 		m_file_size = 0ULL;
 	}
 
+	// ???: Is this just m_file_path.filename?
 	m_file_name.erase(0ULL, m_file_name.find_last_of('/') + 1ULL);
 
 	m_extension = get_ext_from_filename(m_file_name);

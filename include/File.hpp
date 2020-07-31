@@ -56,6 +56,16 @@ public:
 		return m_file_name == other.m_file_name;
 	}
 
+	static bool is_directory(const File& file_t)
+	{
+		switch(file_t.type())
+		{
+			case ft::directory: return true;
+			case ft::symlink: return fs::is_directory(fs::read_symlink(file_t.path()));
+			default: return false;
+		}
+	}
+
 private:
 	fs::path m_file_path;
 	ft m_file_type;

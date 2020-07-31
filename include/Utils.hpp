@@ -3,6 +3,24 @@
 #include <chrono>
 #include <fmt/core.h>
 #include <string_view>
+// #include <source_control>?
+
+#ifndef massert
+#define _TO_STR(x) #x
+#define TO_STR(x)  #x
+#define massert(cond, message)                                 \
+	if(!(cond))                                                \
+	{                                                          \
+		fmt::print(stderr,                                     \
+				   "{}:{}: {}: Assertion `{}` failed. ({})\n", \
+				   __FILE__,                                   \
+				   __LINE__,                                   \
+				   __FUNCTION__,                               \
+				   TO_STR(cond),                               \
+				   message);                                   \
+		std::abort();                                          \
+	}
+#endif
 
 using hr_clock = std::chrono::high_resolution_clock;
 

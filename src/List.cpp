@@ -23,10 +23,11 @@ int main(int argc, char** argv)
 
 	// MAYBE: Do CTRE regex stuff as an argument?
 	// man glob
-	const bool single_input = argc <= 2;
-	if(single_input)
+	if(argc == 1)
 	{
-		OK::File input_file {argc == 1 ? "." : argv[1]};
+		OK::File input_file {"."};
+		// Unnecessary check?
+		/*
 		if(!fs::exists(input_file.path()))
 		{
 			fmt::print(
@@ -49,7 +50,38 @@ int main(int argc, char** argv)
 			OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results.all};
 
 			file_vec.print(results);
+		}*/
+		if(!fs::exists(input_file.path()))
+		{
+			fmt::print(
+				stderr, "    {}File or directory not found{}\n", OK::Color::RED, OK::Color::RESET);
+			return 1;
 		}
+
+		const auto num_of_files_in_directory =
+			std::distance(std::filesystem::directory_iterator {input_file.path()},
+						  std::filesystem::directory_iterator {});
+
+		if(num_of_files_in_directory == 0L)
+		{
+			fmt::print(stderr,
+					   "    {}Nothing to show here...{}\n",
+					   OK::Color::rgb(229, 195, 38),
+					   OK::Color::RESET);
+			return 0;
+		}
+
+		// The actual printing
+		OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results};
+		file_vec.print();
+		return file_vec.return_value();
+	}
+	else
+	{
+		// Multiple inputs in argv, put them in a vector and print those
+		OK::FileVec file_vec {argc, argv, results};
+		file_vec.print();
+		/*
 		else
 		{
 			fmt::print("{}",
@@ -58,12 +90,8 @@ int main(int argc, char** argv)
 													  input_file.username().size(),
 													  input_file.groupname().size()));
 		}
-	}
-	else
-	{
-		// Multiple inputs in argv, put them in a vector and print those
-		OK::FileVec file_vec {argc, argv};
-		file_vec.print(results);
+		*/
+		return file_vec.return_value();
 	}
 
 	return 0;

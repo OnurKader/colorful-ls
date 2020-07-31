@@ -1,16 +1,18 @@
 #include "FileVec.hpp"
 
+#include "Utils.hpp"
+
 #include <numeric>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
 namespace OK
 {
-void FileVec::print_long(ParsedOptions options) const
+void FileVec::print_long() const
 {
-	if(options.human)
+	if(m_parsed_options.human)
 	{
-		if(options.kibi)
+		if(m_parsed_options.kibi)
 			m_longest_file_size = 5ULL;
 		else
 			m_longest_file_size = 4ULL;
@@ -18,9 +20,10 @@ void FileVec::print_long(ParsedOptions options) const
 
 	for(const auto& file: m_files)
 	{
-		fmt::print("{}",
-				   file.long_name_to_string(
-					   options, m_longest_file_size, m_longest_username, m_longest_groupname));
+		fmt::print(
+			"{}",
+			file.long_name_to_string(
+				m_parsed_options, m_longest_file_size, m_longest_username, m_longest_groupname));
 	}
 }
 
@@ -93,14 +96,60 @@ void FileVec::print_one_liner() const
 		fmt::print("    {}\n", file.icon_and_color_filename());
 }
 
-void FileVec::print(ParsedOptions options) const
+void FileVec::print_argc_directory(File&& dir) const
 {
-	if(options.long_listing)
-		print_long(options);
-	else if(options.one_line)
-		print_one_liner();
+	// First print the directory name, Color shall follow later.
+	fmt::print("{}:\n", dir.icon_and_color_filename());
+
+	const auto num_of_files_in_directory = std::distance(
+		std::filesystem::directory_iterator {dir.path()}, std::filesystem::directory_iterator {});
+
+	if(num_of_files_in_directory == 0L)
+	{
+		fmt::print(stderr,
+				   "    {}Nothing to show here...{}\n\n",
+				   OK::Color::rgb(229, 195, 38),
+				   OK::Color::RESET);
+		return;
+	}
+
+	const FileVec dir_vec {std::move(dir), num_of_files_in_directory, m_parsed_options};
+	dir_vec.print();
+	fmt::print("\n");
+}
+
+void FileVec::print_argc() const
+{
+	FileVec regular_file_vec {m_parsed_options};
+	for(auto& file: m_files)
+	{
+		const bool file_is_directory = File::is_directory(file);
+
+		if(file_is_directory)
+			print_argc_directory(std::move(file));
+		else
+			regular_file_vec.push(std::move(file));
+		// print_argc_file(std::move(file));
+	}
+
+	regular_file_vec.print();
+}
+
+void FileVec::print() const
+{
+	if(m_argc_mode)
+	{
+		print_argc();
+	}
 	else
-		print_columnal();
+	{
+		if(m_parsed_options.long_listing)
+			print_long();
+		else if(m_parsed_options.one_line)
+			print_one_liner();
+		else
+			print_columnal();
+	}
 }
 
 }	 // namespace OK
