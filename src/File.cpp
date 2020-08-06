@@ -42,7 +42,6 @@ File::File(const fs::path file_path) :
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 
-	// TODO: In the mb_* functions use fmt::detail::utf8_to_utf16 or whatever it's called
 	m_lowercase_name = tolower(m_file_name);
 
 	// Stat the h*ck out of this file
@@ -332,13 +331,13 @@ void File::handle_icon_and_color() noexcept
 		}
 		case ft::block:
 		{
-			m_color = Color::WHITE;
+			m_color = Color::BLOCK;
 			m_indicator = "\u2588";
 			return;
 		}
 		case ft::character:
 		{
-			m_color = Color::WHITE;
+			m_color = Color::CHARACTER;
 			m_indicator = "c";
 			return;
 		}

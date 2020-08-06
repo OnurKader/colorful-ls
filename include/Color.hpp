@@ -18,7 +18,9 @@ static constexpr std::string_view YELLOW {"\033[38;2;255;255;000m"};
 
 static constexpr std::string_view DIR {"\033[38;2;020;162;255m"};
 static constexpr std::string_view FILE {"\033[38;2;001;255;001m"};
-static constexpr std::string_view SOCK {"\033[38;2;130;020;175m"};
+static constexpr std::string_view SOCK {"\033[38;2;130;020;175m"}; // 100 10 20
+static constexpr std::string_view CHARACTER {"\033[38;2;60;46;144m"};
+static constexpr std::string_view BLOCK {"\033[38;2;218;67;89m"};
 static constexpr std::string_view PIPE {"\033[38;2;151;155;160m"};
 static constexpr std::string_view REG_LINK {"\033[38;2;232;254;032m"};
 static constexpr std::string_view DIR_LINK {"\033[38;2;100;254;164m"};

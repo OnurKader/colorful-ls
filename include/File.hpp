@@ -44,7 +44,7 @@ public:
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
 	[[nodiscard]] std::string get_size_as_string(const bool human,
 												 const bool kibi = false) const noexcept;
-	[[nodiscard]] std::size_t get_size_digit_count() const noexcept;
+	[[nodiscard]] uint64_t get_size_digit_count() const noexcept;
 	[[nodiscard]] std::string get_modification_time() const noexcept;
 
 	// The order is Directories first, then Files, and dotfiles are first in both categories,
@@ -91,3 +91,4 @@ private:
 };
 
 }	 // namespace OK
+

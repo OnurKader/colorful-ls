@@ -96,9 +96,12 @@ void FileVec::print_one_liner() const
 		fmt::print("    {}\n", file.icon_and_color_filename());
 }
 
+// FIXME: List -a AAağ throws Floating Point Exception
+
 void FileVec::print_argc_directory(File&& dir) const
 {
-	// First print the directory name, Color shall follow later.
+	// Do a custom formatting of the color, the icon and the path_name. No indicator, maybe the
+	// symlink colors can be ignored, just OK::Color::DIR and the path().c_str(). Who Knows...
 	fmt::print("{}:\n", dir.icon_and_color_filename());
 
 	const auto num_of_files_in_directory = std::distance(
