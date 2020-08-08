@@ -8,7 +8,7 @@ class FileVec final
 {
 public:
 	// TODO: Add proper directory listing for multiple inputs with the file names shown
-	FileVec(int argc, char** argv, ParsedOptions options) :
+	FileVec(int argc, char** argv, const ParsedOptions& options) :
 		m_parsed_options {options}, m_argc_mode {true}
 	{
 		m_files.reserve(static_cast<std::size_t>(argc - 1));
@@ -32,14 +32,17 @@ public:
 		std::sort(m_files.begin(), m_files.end());
 	}
 
-	FileVec(File&& input_file, ParsedOptions options) : m_parsed_options {options}
+	FileVec(File&& input_file, const ParsedOptions& options) : m_parsed_options {options}
 	{
 		m_files.emplace_back(std::move(input_file));
 	}
 
-	FileVec(ParsedOptions options) : m_parsed_options {options} { m_files.reserve(4ULL); }
+	explicit FileVec(const ParsedOptions& options) : m_parsed_options {options}
+	{
+		m_files.reserve(4ULL);
+	}
 
-	FileVec(File&& input_file, ssize_t num_of_files, ParsedOptions options) :
+	FileVec(File&& input_file, ssize_t num_of_files, const ParsedOptions& options) :
 		m_parsed_options {options}
 	{
 		m_files.reserve(static_cast<std::size_t>(num_of_files));
@@ -85,7 +88,7 @@ private:
 	mutable std::size_t m_longest_file_size {1ULL};
 	mutable std::size_t m_longest_username {1ULL};
 	mutable std::size_t m_longest_groupname {1ULL};
-	const ParsedOptions m_parsed_options;
+	const ParsedOptions& m_parsed_options;
 	int m_return_value {0};
 	const bool m_argc_mode {false};
 

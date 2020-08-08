@@ -8,82 +8,84 @@
 
 namespace OK
 {
-// Bit-fields just make the code ugly, just do bit masking enums
 struct ParsedOptions
 {
-	const bool all : 1;
-	const bool human : 1;
-	const bool kibi : 1;
-	const bool long_listing : 1;
-	const bool color : 1;
-	const bool no_color : 1;
-	const bool reverse : 1;
-	const bool one_line : 1;
-	const bool dir : 1;
-	const bool help : 1;
+	const bool all;
+	const bool human;
+	const bool kibi;
+	const bool long_listing;
+	const bool color;
+	const bool no_color;
+	const bool reverse;
+	const bool one_line;
+	const bool dir;
+	const bool help;
 };
 
 class Args final
 {
 public:
-	[[nodiscard]] std::optional<ParsedOptions> parse(const int argc, char* const* const argv)
+	[[nodiscard]] std::optional<ParsedOptions> parse(const int argc, char** argv)
 	{
-		bool all = false;
-		bool human = false;
-		bool kibi = false;
-		bool long_listing = false;
-		bool color = false;
-		bool no_color = false;
-		bool reverse = false;
-		bool one_line = false;
-		bool dir = false;
-		bool help = false;
+		const auto& all =
+			m_parser["all"].abbreviation('a').description("Show hidden files, except . and ..");
+		const auto& human = m_parser["human"].abbreviation('h').description(
+			"Human readable sizes SI Units by default (1K = 1000)");
+		const auto& kibi = m_parser["kibi"].abbreviation('k').description(
+			"Use Kibi-Byte system (1Ki = 1024) [Requires -h]");
+		const auto& long_listing = m_parser["long"].abbreviation('l').description(
+			"Long listing with size, owners, perms and time");
+		const auto& color = m_parser["color"].abbreviation('c').description(
+			"Force enable colors (enabled by default)");
+		const auto& no_color = m_parser["no-color"].abbreviation('C').description(
+			"Disable colorful printing (Default for non-tty files)");
+		const auto& reverse =
+			m_parser["reverse"].abbreviation('r').description("Reverse the order of printing");
+		const auto& one_line =
+			m_parser["one-line"].abbreviation('1').description("Print a single file on each line");
+		const auto& dir = m_parser["dir"].abbreviation('d').description(
+			"Don't go into a directory, just print it like a file");
 
-		m_options |= lyra::opt(all)["-a"]["--all"]("Show hidden files, except . and ..").optional();
-		m_options |= lyra::opt(human)["-h"]["--human"](
-						 "Human readable sizes SI Units by default (1K = 1000)")
-						 .optional();
-		m_options |=
-			lyra::opt(kibi)["-k"]["--kibi"]("Use Kibi-Byte system (1Ki = 1024). Requires -h")
-				.optional();
-		m_options |= lyra::opt(long_listing)["-l"]["--long"](
-						 "Long listing with size, owners, perms and time")
-						 .optional();
-		m_options |= lyra::opt(color)["-c"]["--color"]("Force enable colors").optional();
-		m_options |= lyra::opt(no_color)["-C"]["--no-color"](
-						 "Disable colorful printing (Default for non-tty files)")
-						 .optional();
-		m_options |=
-			lyra::opt(reverse)["-r"]["--reverse"]("Reverse the order of printing").optional();
-		m_options |=
-			lyra::opt(one_line)["-1"]["--one-line"]("Print a single file on each line").optional();
-		m_options |=
-			lyra::opt(dir)["-d"]["--dir"]("Don't go into a directory, just print it like a file")
-				.optional();
-		m_options |= lyra::opt(help)["-H"]["-?"]["--help"]("Print this screen").optional();
+		const auto& help = m_parser["help"].abbreviation('?').description("Print this help screen");
 
-		m_options |= lyra::arg(m_positionals, "files...")("Filenames to print").optional();
+		// Handle positional filenames
+		m_positionals.reserve(4UL);
 
-		const auto results = m_options.parse({argc, argv});
-		if(!results)
+		m_parser[""].description("Filenames to print").bind(m_positionals);
+
+		if(!m_parser(argc, argv))
 		{
-			fmt::print(stderr, "Error during CLI parsing: {}\n", results.errorMessage());
+			fmt::print(stderr, "Error during CLI parsing\n");
 			return std::nullopt;
 		}
 
-		if(help)
+		if(help.was_set())
 		{
-			fmt::print("{}\n", m_options);
+			fmt::print("{}\n", m_parser);
 			return std::nullopt;
 		}
+
+		for(auto&& str: m_positionals)
+			fmt::print("Positional: {}\n", str);
 
 		return ParsedOptions {
-			all, human, kibi, long_listing, color, no_color, reverse, one_line, dir, help};
+			all.was_set(),
+			human.was_set(),
+			kibi.was_set(),
+			long_listing.was_set(),
+			color.was_set(),
+			no_color.was_set(),
+			reverse.was_set(),
+			one_line.was_set(),
+			dir.was_set(),
+			help.was_set(),
+		};
 	}
 
+	const std::vector<std::string>& positionals() const noexcept { return m_positionals; }
+
 private:
-	// cxxopts::Options m_options {"list", "A colorful ls clone that works with NerdFonts"};
-	lyra::cli_parser m_options {};
+	po::parser m_parser {};
 	std::vector<std::string> m_positionals {};
 };
 
