@@ -17,6 +17,8 @@ using ft = fs::file_type;
 
 namespace OK
 {
+// TODO: Change most of the strings to char[S]'s, group/username => 32, filename => 256,
+// calculate total length of an icon + color + filename
 class File final
 {
 public:
@@ -91,4 +93,3 @@ private:
 };
 
 }	 // namespace OK
-

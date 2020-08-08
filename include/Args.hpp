@@ -2,12 +2,14 @@
 
 #include "cxxopts.hpp"
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <optional>
 
 namespace OK
 {
-// TODO: Make a settings/configurations struct with these options
+// TODO: Change from cxxopts to something else
+// MAYBE: docoptcpp or whatever it's called, or maybe Clara
+
 struct ParsedOptions
 {
 	const bool all : 1;
