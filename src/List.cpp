@@ -11,6 +11,7 @@
 int main(int argc, char** argv)
 {
 	Timer timer {"The whole shebang"};
+	// ???: Unnecessary now?
 	std::setlocale(LC_ALL, "");
 	OK::Args args;
 	const auto results_opt = args.parse(argc, argv);
@@ -20,9 +21,9 @@ int main(int argc, char** argv)
 
 	// MAYBE: Do CTRE regex stuff as an argument?
 	// man glob
-	if(argc == 1)
+	if(argc <= 2)
 	{
-		OK::File input_file {"."};
+		OK::File input_file {argc == 1 ? "." : argv[1]};
 		if(!fs::exists(input_file.path()))
 		{
 			fmt::print(
@@ -59,4 +60,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-

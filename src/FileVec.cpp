@@ -72,7 +72,7 @@ void FileVec::print_columnal() const
 		const auto width = longest_string_file->icon_and_color_filename_length() + 4ULL;
 
 		current_cursor_pos += column_count;
-		const bool overflowed_line = (current_cursor_pos + column_count) >= term_width;
+		const bool overflowed_line = (current_cursor_pos + column_count) > term_width;
 		if(overflowed_line)
 		{
 			if(i == m_files.size() - 1ULL)
@@ -140,6 +140,9 @@ void FileVec::print_argc() const
 
 void FileVec::print() const
 {
+	if(m_files.empty())
+		return;
+
 	if(m_argc_mode)
 	{
 		print_argc();
