@@ -8,6 +8,8 @@
 #include <pwd.h>
 #include <unistd.h>
 
+// TODO: Cache user and group id and retrieve when printing? Or after lstat()
+
 namespace OK
 {
 std::string tolower(const std::string& str);

@@ -1,15 +1,14 @@
 #pragma once
 
-#include "cxxopts.hpp"
+#include "lyra/lyra.hpp"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <optional>
 
 namespace OK
 {
-// TODO: Change from cxxopts to something else
-// MAYBE: docoptcpp or whatever it's called, or maybe Clara
-
+// Bit-fields just make the code ugly, just do bit masking enums
 struct ParsedOptions
 {
 	const bool all : 1;
@@ -21,55 +20,71 @@ struct ParsedOptions
 	const bool reverse : 1;
 	const bool one_line : 1;
 	const bool dir : 1;
+	const bool help : 1;
 };
 
 class Args final
 {
 public:
-	Args()
+	[[nodiscard]] std::optional<ParsedOptions> parse(const int argc, char* const* const argv)
 	{
-		m_options.add_options()("H,help",
-								"Print this screen")("a,all", "Show hidden files, except . and ..")(
-			"h,human", "Human readable sizes SI Units by default (1K = 1000)")(
-			"k,kibi", "Use KibiByte system (1Ki = 1024)")(
-			"l,long", "Long listing with size, ownership, perms and time")(
-			"c,color", "Enable colorful printing (default)")(
-			"C,no-color", "Disable colorful printing, disable if STDOUT is not a tty")(
-			"r,reverse", "Reverse the printing order")(
-			"1,one-line", "Print a single file on each row, not --long")(
-			"d,dir", "Don't go into a directory, just print it");
-	}
+		bool all = false;
+		bool human = false;
+		bool kibi = false;
+		bool long_listing = false;
+		bool color = false;
+		bool no_color = false;
+		bool reverse = false;
+		bool one_line = false;
+		bool dir = false;
+		bool help = false;
 
-	[[nodiscard]] std::optional<ParsedOptions> parse(int& argc, char**& argv)
-	{
-		try
-		{
-			const auto result = m_options.parse(argc, argv);
-			if(result.count("help"))
-			{
-				fmt::print(stderr, "{}", m_options.help());
-				return std::nullopt;
-			}
+		m_options |= lyra::opt(all)["-a"]["--all"]("Show hidden files, except . and ..").optional();
+		m_options |= lyra::opt(human)["-h"]["--human"](
+						 "Human readable sizes SI Units by default (1K = 1000)")
+						 .optional();
+		m_options |=
+			lyra::opt(kibi)["-k"]["--kibi"]("Use Kibi-Byte system (1Ki = 1024). Requires -h")
+				.optional();
+		m_options |= lyra::opt(long_listing)["-l"]["--long"](
+						 "Long listing with size, owners, perms and time")
+						 .optional();
+		m_options |= lyra::opt(color)["-c"]["--color"]("Force enable colors").optional();
+		m_options |= lyra::opt(no_color)["-C"]["--no-color"](
+						 "Disable colorful printing (Default for non-tty files)")
+						 .optional();
+		m_options |=
+			lyra::opt(reverse)["-r"]["--reverse"]("Reverse the order of printing").optional();
+		m_options |=
+			lyra::opt(one_line)["-1"]["--one-line"]("Print a single file on each line").optional();
+		m_options |=
+			lyra::opt(dir)["-d"]["--dir"]("Don't go into a directory, just print it like a file")
+				.optional();
+		m_options |= lyra::opt(help)["-H"]["-?"]["--help"]("Print this screen").optional();
 
-			return ParsedOptions {0UL != result.count("all"),
-								  0UL != result.count("human"),
-								  0UL != result.count("kibi"),
-								  0UL != result.count("long"),
-								  0UL != result.count("color"),
-								  0UL != result.count("no-color"),
-								  0UL != result.count("reverse"),
-								  0UL != result.count("one-line"),
-								  0UL != result.count("dir")};
-		}
-		catch(const cxxopts::OptionParseException& e)
+		m_options |= lyra::arg(m_positionals, "files...")("Filenames to print").optional();
+
+		const auto results = m_options.parse({argc, argv});
+		if(!results)
 		{
-			fmt::print(stderr, "{}\n{}", e.what(), m_options.help());
+			fmt::print(stderr, "Error during CLI parsing: {}\n", results.errorMessage());
 			return std::nullopt;
 		}
+
+		if(help)
+		{
+			fmt::print("{}\n", m_options);
+			return std::nullopt;
+		}
+
+		return ParsedOptions {
+			all, human, kibi, long_listing, color, no_color, reverse, one_line, dir, help};
 	}
 
 private:
-	cxxopts::Options m_options {"list", "A colorful ls clone that works with NerdFonts"};
+	// cxxopts::Options m_options {"list", "A colorful ls clone that works with NerdFonts"};
+	lyra::cli_parser m_options {};
+	std::vector<std::string> m_positionals {};
 };
 
 }	 // namespace OK

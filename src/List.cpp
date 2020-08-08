@@ -13,14 +13,12 @@ int main(int argc, char** argv)
 	Timer timer {"The whole shebang"};
 	// ???: Unnecessary now?
 	std::setlocale(LC_ALL, "");
-	OK::Args args;
+	auto args = OK::Args {};
 	const auto results_opt = args.parse(argc, argv);
 	if(!results_opt)
-		return 69;
+		return 1;
 	const auto results = results_opt.value();
 
-	// MAYBE: Do CTRE regex stuff as an argument?
-	// man glob
 	if(argc <= 2)
 	{
 		OK::File input_file {argc == 1 ? "." : argv[1]};
