@@ -18,10 +18,13 @@ int main(int argc, char** argv)
 	if(!results_opt)
 		return 1;
 	const auto results = results_opt.value();
+	const auto& filenames = args.positionals();
 
-	if(argc <= 2)
+	const auto number_of_filenames = filenames.size();
+
+	if(number_of_filenames < 2UL)
 	{
-		OK::File input_file {argc == 1 ? "." : argv[1]};
+		OK::File input_file {number_of_filenames == 0UL ? "." : filenames.front()};
 		if(!fs::exists(input_file.path()))
 		{
 			fmt::print(
@@ -49,7 +52,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		// Multiple inputs in argv, put them in a vector and print those
+		// FIXME: Switch to taking a vector of std::string's
 		OK::FileVec file_vec {argc, argv, results};
 		file_vec.print();
 
