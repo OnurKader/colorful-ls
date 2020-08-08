@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lyra/lyra.hpp"
+#include "ProgramOptions.hxx"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
