@@ -22,7 +22,7 @@ namespace OK
 class File final
 {
 public:
-	explicit File(const fs::path file_path);
+	explicit File(const fs::path& file_path);
 	File(File&&);
 
 	File& operator=(File&&);
@@ -50,7 +50,7 @@ public:
 	[[nodiscard]] std::string get_modification_time() const noexcept;
 
 	// The order is Directories first, then Files, and dotfiles are first in both categories,
-	// lowercase comparison, find a way to get lowercase unicode characters
+	// lowercase comparison
 	[[nodiscard]] bool operator<(const File& other) const noexcept;
 
 	[[nodiscard]] bool operator==(const File& other) const noexcept

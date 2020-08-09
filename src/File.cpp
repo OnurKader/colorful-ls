@@ -12,12 +12,12 @@
 
 namespace OK
 {
-std::string tolower(const std::string& str);
+static std::string tolower(const std::string& str);
 
-File::File(const fs::path file_path) :
+File::File(const fs::path& file_path) :
 	m_file_path {file_path},
 	m_file_type {fs::symlink_status(m_file_path).type()},
-	m_file_name {file_path.string()},
+	m_file_name {file_path.filename()},
 	m_time_color {Color::rgb(20, 255, 42)}
 {
 	if(fs::is_directory(m_file_path))
@@ -38,14 +38,12 @@ File::File(const fs::path file_path) :
 		m_file_size = 0ULL;
 	}
 
-	// ???: Is this just m_file_path.filename?
-	m_file_name.erase(0ULL, m_file_name.find_last_of('/') + 1ULL);
-
 	m_extension = get_ext_from_filename(m_file_name);
 	handle_icon_and_color();
 
 	m_lowercase_name = tolower(m_file_name);
 
+	// FIXME: This is unnecessary and costly for non --long printing
 	// Stat the h*ck out of this file
 	lstat(m_file_path.c_str(), &m_lstat);
 
@@ -128,7 +126,8 @@ std::string File::long_name_to_string(ParsedOptions po,
 
 	const auto modification_time = get_modification_time();
 
-	// TODO: Symlink point stuff
+	// TODO: Symlink point stuff `-> /dev/null`
+	// ERROR: What? width is not an integer? Probably a bug
 	return fmt::format(FMT_STRING("  {}  {:>{}}  {}{:>{}}{} {}{:>{}}{}  {}{}{}  {}\n"),
 					   get_perms_as_string(),
 					   m_username,
@@ -261,9 +260,10 @@ std::string File::get_modification_time() const noexcept
 {
 	/* Waiting until GCC gets support for chrono formatting
 	const auto modify_time = fs::last_write_time(m_file_path);
-	const auto epoch_time = std::chrono::file_clock::to_sys(modify_time).time_since_epoch().count();
-	const char* format_time = std::ctime(&epoch_time);
-	return fmt::format("{}", format_time == nullptr ? "NULL" : format_time);
+	const auto epoch_time =
+	std::chrono::file_clock::to_sys(modify_time).time_since_epoch().count(); const char*
+	format_time = std::ctime(&epoch_time); return fmt::format("{}", format_time == nullptr ?
+	"NULL" : format_time);
 	*/
 
 	std::string result = std::ctime(&m_modify_time);
@@ -301,7 +301,8 @@ void File::handle_icon_and_color() noexcept
 		}
 		case ft::symlink:
 		{
-			// This only does one level of following, what if the file that's linked to is a link?
+			// This only does one level of following, what if the file that's linked to is a
+			// link?
 			const auto followed_link = fs::read_symlink(m_file_path);
 			if(!fs::exists(followed_link))
 			{
@@ -380,8 +381,14 @@ std::string tolower(const std::string& str)
 {
 	std::string result(str.size(), '\0');
 	// MAYBE: just do a naive ASCII chr <= 'Z' && 'A' <= chr kinda stuff
+	const auto ascii_lower = [](char chr) {
+		if(chr <= 'Z' && chr >= 'A')
+			return static_cast<char>(chr + 32);
+		return chr;
+	};
+
 	std::transform(
-		str.cbegin(), str.cend(), result.begin(), [](char chr) { return std::tolower(chr); });
+		str.cbegin(), str.cend(), result.begin(), [&](char chr) { return ascii_lower(chr); });
 
 	return result;
 }

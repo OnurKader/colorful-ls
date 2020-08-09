@@ -55,7 +55,7 @@ public:
 
 		if(!m_parser(argc, argv))
 		{
-			fmt::print(stderr, "Error during CLI parsing\n");
+			fmt::print(stderr, "Error during CLI parsing\n{}\n", m_parser);
 			return std::nullopt;
 		}
 
@@ -64,9 +64,6 @@ public:
 			fmt::print("{}\n", m_parser);
 			return std::nullopt;
 		}
-
-		for(auto&& str: m_positionals)
-			fmt::print("Positional: {}\n", str);
 
 		return ParsedOptions {
 			all.was_set(),

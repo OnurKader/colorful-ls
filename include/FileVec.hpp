@@ -7,25 +7,25 @@ namespace OK
 class FileVec final
 {
 public:
-	// TODO: Add proper directory listing for multiple inputs with the file names shown
-	FileVec(int argc, char** argv, const ParsedOptions& options) :
-		m_parsed_options {options}, m_argc_mode {true}
+	FileVec(const std::vector<std::string>& filenames, const ParsedOptions& options) :
+		// m_files {filenames.cbegin(), filenames.cend()}, m_parsed_options {options}
+		m_parsed_options {options},
+		m_argc_mode {true}
 	{
-		m_files.reserve(static_cast<std::size_t>(argc - 1));
-		for(int i = 1; i < argc; ++i)
+		m_files.reserve(filenames.size());
+		for(auto&& filename: filenames)
 		{
-			fs::path file_path {argv[i]};
-			if(!fs::exists(file_path))
+			if(!fs::exists(filename))
 			{
 				fmt::print(stderr,
 						   "    {}File or directory not found '{}'{}\n",
 						   OK::Color::RED,
-						   argv[i],
+						   filename,
 						   OK::Color::RESET);
-				m_return_value = 2;
+				m_return_value = 1;
 				continue;
 			}
-			m_files.emplace_back(argv[i]);
+			m_files.emplace_back(filename);
 			handle_lengths();
 		}
 

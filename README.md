@@ -1,5 +1,6 @@
 # colorful-ls
-https://github.com/OnurKader/list
+
+[list](https://github.com/OnurKader/list)
 
 _**TODO**_
 
@@ -7,4 +8,5 @@ _**TODO**_
 
 [{fmt}](https://github.com/fmtlib/fmt)
 
-[cxxopts](https://github.com/jarro2783/cxxopts)
+[ProgramOptions](https://github.com/Fytch/ProgramOptions.hxx)
+
