@@ -22,6 +22,10 @@
 	}
 #endif
 
+#ifndef ASSERT_NOT_REACHED
+#define ASSERT_NOT_REACHED() std::abort()
+#endif
+
 using hr_clock = std::chrono::high_resolution_clock;
 
 struct Timer final

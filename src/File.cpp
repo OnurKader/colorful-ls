@@ -1,6 +1,7 @@
 #include "File.hpp"
 
 #include <algorithm>
+#include <fmt/compile.h>
 #include <fmt/format.h>
 
 // Sorry for this!
@@ -94,7 +95,7 @@ bool File::operator<(const File& other) const noexcept
 
 std::string File::icon_and_color_filename() const noexcept
 {
-	return fmt::format("{}{}{}{}{}", m_color, m_icon, m_file_name, Color::RESET, m_indicator);
+	return fmt::format(FMT_COMPILE("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
 uint64_t File::icon_and_color_filename_length() const noexcept
@@ -128,7 +129,7 @@ std::string File::long_name_to_string(ParsedOptions po,
 
 	// TODO: Symlink point stuff `-> /dev/null`
 	// ERROR: What? width is not an integer? Probably a bug
-	return fmt::format(FMT_STRING("  {}  {:>{}}  {}{:>{}}{} {}{:>{}}{}  {}{}{}  {}\n"),
+	return fmt::format(FMT_COMPILE("  {}  {:>{}}  {}{:>{}}{} {}{:>{}}{}  {}{}{}  {}\n"),
 					   get_perms_as_string(),
 					   m_username,
 					   longest_username_length,

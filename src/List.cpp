@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 			return 1;
 		}
 
+		// FIXME: Check if input_file is a directory or not
 		const auto num_of_files_in_directory =
 			std::distance(std::filesystem::directory_iterator {input_file.path()},
 						  std::filesystem::directory_iterator {});

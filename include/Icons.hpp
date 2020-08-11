@@ -93,7 +93,7 @@ static constexpr std::array icons {// Peki <3
 								   std::pair {"mpeg", "\uf880 "},
 								   std::pair {"mpg", "\uf880 "},
 								   std::pair {"Videos", "\uf880 "},
-								   std::pair {"webm", "\uf03d"},
+								   std::pair {"webm", "\uf03d "},
 								   std::pair {"wmv", "\uf880 "},
 								   // Image
 								   std::pair {"bmp", "\uf7e8 "},
@@ -201,7 +201,7 @@ static constexpr std::array icons {// Peki <3
 static constexpr std::string_view default_file_icon {"\uf15b "};
 static constexpr std::string_view default_directory_icon {"\ue5fe "};
 
-inline std::string_view get_ext_from_filename(const std::string_view filename)
+inline std::string_view get_ext_from_filename(std::string_view filename)
 {
 	const auto last_dot = filename.find_last_of('.');
 	if(last_dot == filename.npos)
@@ -210,7 +210,7 @@ inline std::string_view get_ext_from_filename(const std::string_view filename)
 	return filename.substr(last_dot + 1ULL);
 }
 
-inline std::optional<std::string_view> get_icon_from_ext(const std::string_view ext)
+inline std::optional<std::string_view> get_icon_from_ext(std::string_view ext)
 {
 	for(auto&& pair: icons)
 		if(pair.first == ext)
@@ -218,3 +218,4 @@ inline std::optional<std::string_view> get_icon_from_ext(const std::string_view 
 
 	return std::nullopt;
 }
+
