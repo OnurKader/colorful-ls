@@ -8,6 +8,31 @@
 
 namespace OK
 {
+FileVec::FileVec(const std::vector<std::string>& filenames, const ParsedOptions& options) :
+	// m_files {filenames.cbegin(), filenames.cend()}, m_parsed_options {options}
+	m_parsed_options {options},
+	m_argc_mode {true}
+{
+	m_files.reserve(filenames.size());
+	for(auto&& filename: filenames)
+	{
+		if(!fs::exists(filename))
+		{
+			fmt::print(stderr,
+					   "    {}File or directory not found '{}'{}\n",
+					   OK::Color::RED,
+					   filename,
+					   OK::Color::RESET);
+			m_return_value = 1;
+			continue;
+		}
+		m_files.emplace_back(filename);
+		handle_lengths();
+	}
+
+	std::sort(m_files.begin(), m_files.end());
+}
+
 void FileVec::print_long() const
 {
 	if(m_parsed_options.human)
