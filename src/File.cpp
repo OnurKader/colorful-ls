@@ -93,6 +93,43 @@ bool File::operator<(const File& other) const noexcept
 	}
 }
 
+bool File::operator>(const File& other) const noexcept
+{
+	ft this_type = m_file_type;
+	ft other_type = other.m_file_type;
+
+	if(this_type == ft::symlink)
+	{
+		const auto followed_stat = fs::status(m_file_path);
+		if(fs::exists(followed_stat))
+			this_type = followed_stat.type();
+	}
+
+	if(other_type == ft::symlink)
+	{
+		const auto followed_stat = fs::status(other.m_file_path);
+		if(fs::exists(followed_stat))
+			other_type = followed_stat.type();
+	}
+
+	if(this_type == ft::directory && other_type != ft::directory)
+	{
+		return true;
+	}
+	else if(this_type != ft::directory && other_type == ft::directory)
+	{
+		return false;
+	}
+	else
+	{
+		const auto& lhs = m_lowercase_name;
+		const auto& rhs = other.m_lowercase_name;
+		const auto retval = strverscmp(lhs.c_str(), rhs.c_str());
+
+		return retval > 0;
+	}
+}
+
 std::string File::icon_and_color_filename() const noexcept
 {
 	return fmt::format(FMT_COMPILE("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);

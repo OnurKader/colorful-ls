@@ -53,6 +53,7 @@ public:
 	// The order is Directories first, then Files, and dotfiles are first in both categories,
 	// lowercase comparison
 	[[nodiscard]] bool operator<(const File& other) const noexcept;
+	[[nodiscard]] bool operator>(const File& other) const noexcept;
 
 	[[nodiscard]] bool operator==(const File& other) const noexcept
 	{

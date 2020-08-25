@@ -65,7 +65,10 @@ public:
 			}
 		}
 
-		std::sort(m_files.begin(), m_files.end());
+		if(options.reverse)
+			std::sort(m_files.begin(), m_files.end(), std::greater());
+		else
+			std::sort(m_files.begin(), m_files.end()), std::less();
 	}
 
 	auto begin() noexcept { return m_files.begin(); }
