@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Args.hpp"
-#include "CharArray.hpp"
 #include "Color.hpp"
 #include "Icons.hpp"
 

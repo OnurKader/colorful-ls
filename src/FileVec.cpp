@@ -55,6 +55,8 @@ void FileVec::print_long() const
 inline uint16_t get_term_width() noexcept
 {
 	struct winsize ws;
+
+	// If output isn't a tty, or something bad happened in ioctl, return 80 columns
 	if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != 0)
 		return 80U;
 	return ws.ws_col;
