@@ -3,6 +3,8 @@
 #include "FileVec.hpp"
 #include "Utils.hpp"
 
+// FIXME: List -a /usr/local/bin throws a SEGFAULT, look at file type handling and permissions
+
 int main(int argc, char** argv)
 {
 	const Timer timer {"The whole shebang"};

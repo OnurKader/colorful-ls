@@ -84,36 +84,45 @@ void FileVec::print_columnal() const
 		return;
 	}
 
-	std::size_t offset = 4ULL;
+	std::size_t offset = 4UL;
 	if(term_width > longest_string_length)
 		offset = term_width % longest_string_length / (term_width / longest_string_length);
 
-	const auto column_count = longest_string_length + (offset > 4ULL ? offset : 4ULL) + 4ULL;
-	std::size_t current_cursor_pos = 4ULL;
+	const auto column_count = longest_string_length + std::max(offset, 4UL) + 4UL;
+	std::size_t current_cursor_pos = 4UL;
+
+	fmt::print("offset: {}, longest_string_length: {}\nterm_width: {}, column_count: "
+			   "{}\nlongest_string_file: {}\n",
+			   offset,
+			   longest_string_length,
+			   term_width,
+			   column_count,
+			   longest_string_file->name());
 
 	fmt::print("    ");
-	for(std::size_t i = 0ULL; i < m_files.size(); ++i)
+	for(std::size_t i = 0UL; i < m_files.size(); ++i)
 	{
 		const auto& file = m_files[i];
 		const auto& file_string = file.icon_and_color_filename();
-		const auto width = longest_string_file->icon_and_color_filename_length() + 4ULL;
+		const auto width = longest_string_file->icon_and_color_filename_length() + 4UL;
 
 		current_cursor_pos += column_count;
-		const bool overflowed_line = (current_cursor_pos + column_count) > term_width;
+		const bool overflowed_line = (current_cursor_pos + column_count - 8UL >= term_width);
 		if(overflowed_line)
 		{
-			if(i == m_files.size() - 1ULL)
+			if(i == m_files.size() - 1UL)
 				fmt::print("{}\n", file_string);
 			else
 				fmt::print("{}\n    ", file_string);
-			current_cursor_pos = 4ULL;
+			// FIXME: Change the right 4UL's to constexpr variables, or adjustable from commandline
+			current_cursor_pos = 4UL;
 		}
 		else
 		{
 			fmt::print("{:{}}", file_string, width);
 		}
 	}
-	if(current_cursor_pos > 4ULL)
+	if(current_cursor_pos > 4UL)
 		fmt::print("\n");
 }
 
@@ -122,8 +131,6 @@ void FileVec::print_one_liner() const
 	for(const auto& file: m_files)
 		fmt::print("    {}\n", file.icon_and_color_filename());
 }
-
-// FIXME: List -a AAağ throws Floating Point Exception
 
 void FileVec::print_argc_directory(File&& dir) const
 {

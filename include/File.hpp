@@ -23,9 +23,9 @@ class File final
 {
 public:
 	explicit File(const fs::path& file_path);
-	File(File&&);
+	File(File&&) noexcept;
 
-	File& operator=(File&&);
+	File& operator=(File&&) noexcept;
 
 	[[nodiscard]] auto name() const noexcept { return m_file_name; }
 	[[nodiscard]] fs::path path() const noexcept { return m_file_path; }

@@ -52,9 +52,9 @@ File::File(const fs::path& file_path) :
 	handle_modify_time_and_color();
 }
 
-File::File(File&& other) = default;
+File::File(File&& other) noexcept = default;
 
-File& File::operator=(File&& other) = default;
+File& File::operator=(File&& other) noexcept = default;
 
 bool File::operator<(const File& other) const noexcept
 {
@@ -132,7 +132,8 @@ bool File::operator>(const File& other) const noexcept
 
 std::string File::icon_and_color_filename() const noexcept
 {
-	return fmt::format(FMT_COMPILE("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
+	return fmt::format(
+		FMT_COMPILE("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
 uint64_t File::icon_and_color_filename_length() const noexcept
@@ -153,11 +154,11 @@ std::string File::long_name_to_string(ParsedOptions po,
 	const std::string size_color = [&] {
 		if(m_file_size < 1'000'000ULL)	  // 1MB
 			return Color::rgb(255, 255, 255);
-		else if(m_file_size < 128'000'000ULL)	 // 128MB
+		if(m_file_size < 128'000'000ULL)	// 128MB
 			return Color::rgb(113, 220, 208);
-		else if(m_file_size < 512'000'000ULL)	 // 512MB
+		if(m_file_size < 512'000'000ULL)	// 512MB
 			return Color::rgb(250, 250, 48);
-		else if(m_file_size < 1'000'000'000ULL)	   // 1GB
+		if(m_file_size < 1'000'000'000ULL)	  // 1GB
 			return Color::rgb(223, 134, 89);
 		return Color::rgb(0, 255, 255);
 	}();
@@ -184,14 +185,16 @@ std::string File::long_name_to_string(ParsedOptions po,
 					   icon_and_color_filename());
 }
 
-inline std::size_t mb_strlen(std::string_view str) { return fmt::detail::count_code_points(str); }
+inline std::size_t mb_strlen(std::string_view str) noexcept
+{
+	return fmt::detail::count_code_points(str);
+}
 
 uint64_t File::string_length() const noexcept
 {
 	uint64_t total_length = mb_strlen(m_icon);
 	total_length += mb_strlen(m_file_name);
-	total_length += m_indicator.size();
-	total_length += mb_strlen(m_indicator);
+	total_length += 1UL;	// Indicator
 	return total_length;
 }
 
@@ -239,6 +242,7 @@ std::string File::get_perms_as_string() const noexcept
 		}
 	};
 
+	// MAYBE: Change this to a constexpr template function? Or just a template
 #define PERM_STRING(p)                \
 	if((perm & p) != fs::perms::none) \
 	{                                 \

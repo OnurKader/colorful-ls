@@ -170,7 +170,7 @@ namespace po {
 #endif // !PROGRAMOPTIONS_NO_COLORS
 
 	struct error_t {
-		friend std::ostream& operator<<(std::ostream& stream, error_t const& /* object */) { // -Wunused-parameter
+		friend std::ostream& operator<<(std::ostream& stream, po::error_t  /* object */) { // -Wunused-parameter
 			return stream << red << "error: ";
 		}
 	};
