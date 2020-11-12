@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 		}
 
 		// The actual printing of the directory/file
-		const OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results};
+		OK::FileVec file_vec {std::move(input_file), num_of_files_in_directory, results};
 		file_vec.print();
 
 		return file_vec.return_value();
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	else
 	{
 		// Construct a FileVec from the vector of strings we got in the args
-		const OK::FileVec file_vec {filenames, results};
+		OK::FileVec file_vec {filenames, results};
 		file_vec.print();
 
 		return file_vec.return_value();

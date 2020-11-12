@@ -41,12 +41,12 @@ public:
 		std::size_t longest_username_length,
 		std::size_t longest_groupname_length) const noexcept;
 	[[nodiscard]] std::string icon_and_color_filename() const noexcept;
-	[[nodiscard]] uint64_t icon_and_color_filename_length() const noexcept;
-	[[nodiscard]] uint64_t string_length() const noexcept;
+	[[nodiscard]] std::uint64_t icon_and_color_filename_length() const noexcept;
+	[[nodiscard]] std::uint64_t string_length() const noexcept;
 	[[nodiscard]] std::string get_perms_as_string() const noexcept;
 	[[nodiscard]] std::string get_size_as_string(const bool human,
 												 const bool kibi = false) const noexcept;
-	[[nodiscard]] uint64_t get_size_digit_count() const noexcept;
+	[[nodiscard]] std::uint64_t get_size_digit_count() const noexcept;
 	[[nodiscard]] std::string get_modification_time() const noexcept;
 
 	// The order is Directories first, then Files, and dotfiles are first in both categories,
@@ -69,6 +69,15 @@ public:
 		}
 	}
 
+	void prepare_for_long_printing()
+	{
+		lstat(m_file_path.c_str(), &m_lstat);
+
+		handle_username();
+		handle_groupname();
+		handle_modify_time_and_color();
+	}
+
 private:
 	fs::path m_file_path;
 	ft m_file_type;
@@ -82,14 +91,17 @@ private:
 	std::string m_username;
 	std::string m_groupname;
 
-	std::time_t m_modify_time;
+	std::time_t m_modify_time {};
 	mutable std::string m_time_color;
 
 	std::string m_lowercase_name;
-	struct stat m_lstat;
+	struct stat m_lstat
+	{
+	};
 
 	void handle_icon_and_color() noexcept;
-	void handle_user_and_groupname();
+	void handle_username();
+	void handle_groupname();
 	void handle_modify_time_and_color();
 };
 

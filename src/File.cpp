@@ -43,13 +43,6 @@ File::File(const fs::path& file_path) :
 	handle_icon_and_color();
 
 	m_lowercase_name = tolower(m_file_name);
-
-	// FIXME: This is unnecessary and costly for non --long printing
-	// Stat the h*ck out of this file
-	lstat(m_file_path.c_str(), &m_lstat);
-
-	handle_user_and_groupname();
-	handle_modify_time_and_color();
 }
 
 File::File(File&& other) noexcept = default;
@@ -136,7 +129,7 @@ std::string File::icon_and_color_filename() const noexcept
 		FMT_COMPILE("{}{}{}{}{}"), m_color, m_icon, m_file_name, Color::RESET, m_indicator);
 }
 
-uint64_t File::icon_and_color_filename_length() const noexcept
+std::uint64_t File::icon_and_color_filename_length() const noexcept
 {
 	return (m_color.size() + 1ULL + m_file_name.size() + Color::RESET.size() + m_indicator.size());
 }
@@ -190,7 +183,7 @@ inline std::size_t mb_strlen(std::string_view str) noexcept
 	return fmt::detail::count_code_points(str);
 }
 
-uint64_t File::string_length() const noexcept
+std::uint64_t File::string_length() const noexcept
 {
 	uint64_t total_length = mb_strlen(m_icon);
 	total_length += mb_strlen(m_file_name);
@@ -309,7 +302,7 @@ std::string File::get_modification_time() const noexcept
 	*/
 
 	std::string result = std::ctime(&m_modify_time);
-	result.erase(result.end() - 1ULL);
+	result.pop_back();
 
 	return result;
 }
@@ -389,12 +382,15 @@ void File::handle_icon_and_color() noexcept
 	}
 }
 
-void File::handle_user_and_groupname()
+void File::handle_username()
 {
 	const struct passwd* pw = getpwuid(m_lstat.st_uid);
-	const struct group* gr = getgrgid(m_lstat.st_gid);
-
 	m_username = pw->pw_name;
+}
+
+void File::handle_groupname()
+{
+	const struct group* gr = getgrgid(m_lstat.st_gid);
 	m_groupname = gr->gr_name;
 }
 
@@ -429,8 +425,7 @@ std::string tolower(const std::string& str)
 		return chr;
 	};
 
-	std::transform(
-		str.cbegin(), str.cend(), result.begin(), [&](char chr) { return ascii_lower(chr); });
+	std::transform(str.cbegin(), str.cend(), result.begin(), ascii_lower);
 
 	return result;
 }

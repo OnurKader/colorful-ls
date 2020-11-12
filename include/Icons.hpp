@@ -4,6 +4,7 @@
 #include <optional>
 #include <string_view>
 
+// TODO: Change this into std::to_array<std::pair<const char*, const char*>(...);
 static constexpr std::array icons {// Peki <3
 								   std::pair {"Peki", "\uf004 "},
 								   std::pair {"peki", "\uf004 "},

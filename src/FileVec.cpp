@@ -33,7 +33,7 @@ FileVec::FileVec(const std::vector<std::string>& filenames, const ParsedOptions&
 	std::sort(m_files.begin(), m_files.end());
 }
 
-void FileVec::print_long() const
+void FileVec::print_long()
 {
 	if(m_parsed_options.human)
 	{
@@ -43,7 +43,7 @@ void FileVec::print_long() const
 			m_longest_file_size = 4ULL;
 	}
 
-	for(const auto& file: m_files)
+	for(auto&& file: m_files)
 	{
 		fmt::print(
 			"{}",
@@ -79,7 +79,6 @@ void FileVec::print_columnal() const
 
 	if(longest_string_length > term_width)
 	{
-		// One liner
 		print_one_liner();
 		return;
 	}
@@ -150,7 +149,7 @@ void FileVec::print_argc_directory(File&& dir) const
 		return;
 	}
 
-	const FileVec dir_vec {std::move(dir), num_of_files_in_directory, m_parsed_options};
+	FileVec dir_vec {std::move(dir), num_of_files_in_directory, m_parsed_options};
 	dir_vec.print();
 	fmt::print("\n");
 }
@@ -172,7 +171,7 @@ void FileVec::print_argc() const
 	regular_file_vec.print();
 }
 
-void FileVec::print() const
+void FileVec::print()
 {
 	if(m_files.empty())
 		return;
