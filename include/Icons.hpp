@@ -116,6 +116,7 @@ static constexpr std::array icons {// Peki <3
 								   std::pair {"bashrc", "\ue615 "},
 								   std::pair {"bash", "\ue615 "},
 								   std::pair {"bin", "\uf114 "},
+								   std::pair {"build", "\ue615 "},
 								   std::pair {"cfg", "\ue615 "},
 								   std::pair {"conf", "\ue615 "},
 								   std::pair {"config", "\ue615 "},
