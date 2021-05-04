@@ -180,7 +180,7 @@ std::string File::long_name_to_string(ParsedOptions po,
 
 inline std::size_t mb_strlen(std::string_view str) noexcept
 {
-	return fmt::detail::count_code_points(str);
+	return fmt::detail::compute_width(str);
 }
 
 std::uint64_t File::string_length() const noexcept
